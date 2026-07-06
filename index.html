@@ -129,6 +129,19 @@ label.fld{display:block;font-size:12px;color:var(--dim);margin:12px 0 5px;font-w
 .seg button.on{background:var(--primary);color:#fff}
 .notice{background:color-mix(in srgb,var(--warn) 15%,transparent);border:1px solid color-mix(in srgb,var(--warn) 40%,transparent);color:#fde68a;padding:10px 12px;border-radius:11px;font-size:13px;line-height:1.5}
 .correct{color:var(--ok);font-weight:700}.wrong{color:var(--bad);font-weight:700}
+/* 內頁教學 */
+.guide{margin-top:12px;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--bg)}
+.guide>summary{padding:12px 14px;font-weight:700;font-size:14px;cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;gap:8px;color:var(--primary2)}
+.guide>summary::-webkit-details-marker{display:none}
+.guide>summary::after{content:"＋";font-weight:800;font-size:16px;color:var(--primary2)}
+.guide[open]>summary::after{content:"－"}
+.guide .gbody{padding:2px 14px 16px}
+.gstep{display:flex;gap:11px;padding:9px 0;border-top:1px solid var(--line)}
+.gstep .gn{flex:none;width:26px;height:26px;border-radius:8px;display:grid;place-items:center;font-size:13px;font-weight:800;color:#fff;background:linear-gradient(140deg,var(--primary),#a855f7)}
+.gstep .gt{font-size:13.5px;line-height:1.6;color:var(--txt)}
+.gstep .gt b{color:var(--txt)}
+.gstep code{background:var(--card2);color:var(--primary2);padding:1px 6px;border-radius:5px;font-size:12.5px;word-break:break-all}
+.gtip{margin-top:10px;font-size:12.5px;color:var(--dim);line-height:1.6;background:var(--card2);border-radius:9px;padding:9px 11px}
 </style>
 </head>
 <body>
@@ -216,8 +229,20 @@ label.fld{display:block;font-size:12px;color:var(--dim);margin:12px 0 5px;font-w
       <button class="btn sm" onclick="saveSettings()">💾 儲存</button>
     </div>
     <div class="notice" style="margin-top:12px">
-      🔑 免費取得金鑰：到 <b>aistudio.google.com/apikey</b> 用 Google 帳號登入 → 建立 API 金鑰 → 複製貼上。金鑰只存在本機，不會外傳。
+      🔑 金鑰完全<b>免費</b>（Gemini Flash 免費額度，學生用不完），只存在本機、不會外傳。不確定怎麼拿？看下方教學 👇
     </div>
+
+    <details class="guide">
+      <summary>📖 怎麼取得 Gemini 金鑰？（5 步驟）</summary>
+      <div class="gbody">
+        <div class="gstep"><div class="gn">1</div><div class="gt">用瀏覽器打開 <code>aistudio.google.com/apikey</code>，以 <b>Google 帳號</b>登入（Gmail 就可以）。</div></div>
+        <div class="gstep"><div class="gn">2</div><div class="gt">按藍色的 <b>Create API key</b>（中文：<b>建立 API 金鑰</b>）；若問專案，選推薦的或建新專案。</div></div>
+        <div class="gstep"><div class="gn">3</div><div class="gt">複製出現的金鑰，長這樣：<code>AIzaSyD…</code>（一長串英數字約 39 碼）。</div></div>
+        <div class="gstep"><div class="gn">4</div><div class="gt">回到這頁，<b>長按貼上</b>到上方「API 金鑰」欄；模型維持預設 <code>gemini-2.5-flash</code>。</div></div>
+        <div class="gstep"><div class="gn">5</div><div class="gt">按 <b>🔌 測試連線</b>，看到 <b style="color:var(--ok)">✅ 連線成功</b>就完成！之後按 ＋ 拍照就能自動辨識。</div></div>
+        <div class="gtip">🔒 <b>安全</b>：金鑰等於你 Google 帳號的鑰匙，別貼到群組或公開網頁；萬一外流，回 AI Studio 刪掉重建一把即可。<br>❓ <b>沒金鑰也能用</b>：可純手動輸入題目，一樣能分類、搜尋、複習。</div>
+      </div>
+    </details>
   </div>
 
   <div class="card">
