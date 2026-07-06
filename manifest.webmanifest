@@ -1,0 +1,15 @@
+{
+  "name": "錯題管理器",
+  "short_name": "錯題本",
+  "description": "學測全科錯題管理：拍照辨識、分類、複習、搜尋",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0f1222",
+  "theme_color": "#4f46e5",
+  "lang": "zh-Hant",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}
