@@ -7,7 +7,13 @@
 <title>錯題管理器</title>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon.svg">
-<link rel="apple-touch-icon" href="icon.svg">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-180.png">
+<!-- iOS 加入主畫面 -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="錯題本">
 <style>
 :root{
   --bg:#0f1222; --bg2:#171a2e; --card:#1e2138; --card2:#262a44;
@@ -142,6 +148,41 @@ label.fld{display:block;font-size:12px;color:var(--dim);margin:12px 0 5px;font-w
 .gstep .gt b{color:var(--txt)}
 .gstep code{background:var(--card2);color:var(--primary2);padding:1px 6px;border-radius:5px;font-size:12.5px;word-break:break-all}
 .gtip{margin-top:10px;font-size:12.5px;color:var(--dim);line-height:1.6;background:var(--card2);border-radius:9px;padding:9px 11px}
+
+/* ===== 安裝橫幅 ===== */
+.install-banner{display:none;position:fixed;left:12px;right:12px;bottom:calc(84px + env(safe-area-inset-bottom,0));z-index:47;background:linear-gradient(135deg,#4f46e5,#7c3aed);color:#fff;border-radius:14px;padding:11px 12px;box-shadow:0 8px 24px rgba(79,70,229,.42);align-items:center;gap:10px}
+.install-banner.show{display:flex}
+.install-banner .txt{flex:1;font-size:13px;line-height:1.4}
+.install-banner .txt b{font-weight:800;font-size:14px}
+.install-banner .bins{background:#fff;color:var(--primary);border:none;border-radius:10px;padding:8px 15px;font-weight:800;font-size:13.5px;cursor:pointer;white-space:nowrap}
+.install-banner .bins:active{transform:scale(.95)}
+.install-banner .bx{background:rgba(255,255,255,.22);border:none;color:#fff;width:30px;height:30px;border-radius:8px;font-size:15px;cursor:pointer;flex:none}
+
+/* ===== 側邊欄（平板橫式 / 桌面）===== */
+.sidebar{display:none}
+@media (min-width:900px){
+  header.app{display:none}
+  nav.tabs{display:none}
+  body{padding-bottom:28px}
+  .sidebar{display:flex;flex-direction:column;gap:3px;position:fixed;top:0;left:0;width:216px;height:100vh;z-index:50;background:rgba(23,26,46,.97);backdrop-filter:blur(14px);border-right:1px solid var(--line);padding:22px 12px}
+  .sidebar .sb-logo{display:flex;align-items:center;gap:9px;font-size:18px;font-weight:800;padding:6px 12px 20px}
+  .sidebar .sb-logo .em{font-size:24px}
+  .sidebar button{display:flex;align-items:center;gap:12px;width:100%;text-align:left;background:none;border:none;color:var(--dim);font-size:15px;font-weight:600;padding:12px 14px;border-radius:12px;cursor:pointer;font-family:inherit}
+  .sidebar button .i{font-size:19px;width:22px;text-align:center}
+  .sidebar button:hover{background:var(--card2);color:var(--txt)}
+  .sidebar button.on{background:var(--primary);color:#fff}
+  .sidebar .sb-spacer{flex:1}
+  .wrap{margin-left:216px;max-width:1040px;padding:0 26px}
+  section.page{padding:24px 0 32px}
+  .fab{right:30px;bottom:30px;width:62px;height:62px;font-size:30px}
+  #listArea.flat{display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:start}
+  #listArea.flat .card{margin-bottom:0}
+  .install-banner{left:auto;right:26px;bottom:26px;max-width:360px}
+}
+@media (min-width:1280px){
+  .wrap{max-width:1200px}
+  #listArea.flat{grid-template-columns:1fr 1fr 1fr}
+}
 </style>
 </head>
 <body>
@@ -157,6 +198,17 @@ label.fld{display:block;font-size:12px;color:var(--dim);margin:12px 0 5px;font-w
     <button class="iconbtn" onclick="go('settings')" title="設定">⚙️</button>
   </div>
 </header>
+
+<!-- 側邊欄（平板橫式/桌面顯示） -->
+<aside class="sidebar">
+  <div class="sb-logo"><span class="em">📕</span>錯題管理器</div>
+  <button class="on" data-p="list" onclick="go('list')"><span class="i">📚</span>錯題本</button>
+  <button data-p="review" onclick="go('review')"><span class="i">🔥</span>複習</button>
+  <button data-p="stats" onclick="go('stats')"><span class="i">📊</span>統計</button>
+  <button data-p="settings" onclick="go('settings')"><span class="i">⚙️</span>設定</button>
+  <div class="sb-spacer"></div>
+  <button onclick="openSearch()"><span class="i">🔍</span>搜尋</button>
+</aside>
 
 <div class="wrap">
 
@@ -212,6 +264,14 @@ label.fld{display:block;font-size:12px;color:var(--dim);margin:12px 0 5px;font-w
 
 <!-- ============ 設定 ============ -->
 <section class="page" id="page-settings">
+  <div class="card" id="installCard" style="display:none;border-color:var(--primary)">
+    <h3 style="margin:0 0 4px;font-size:16px">📲 安裝到桌面</h3>
+    <p class="muted" style="margin:4px 0 10px">裝起來像一般 App：開啟更快、全螢幕、可離線使用。</p>
+    <button class="btn full" onclick="doInstall()">📲 安裝 / 加到主畫面</button>
+  </div>
+  <div class="card" id="installedCard" style="display:none;border-color:var(--ok)">
+    <p style="margin:0;font-weight:700"><span style="color:var(--ok)">✓</span> 已在 App 模式執行，隨時可離線使用 🎉</p>
+  </div>
   <div class="card">
     <h3 style="margin:0 0 4px;font-size:16px">🤖 Gemini 辨識設定</h3>
     <p class="muted" style="margin:4px 0 10px">拍照自動辨識題目、分類、生成解析。使用 Google Gemini（有免費額度）。</p>
@@ -269,6 +329,13 @@ label.fld{display:block;font-size:12px;color:var(--dim);margin:12px 0 5px;font-w
 </section>
 
 </div><!--/wrap-->
+
+<!-- 安裝橫幅 -->
+<div class="install-banner" id="installBanner">
+  <div class="txt"><b>把錯題本裝到桌面 📲</b><br>像 App 一樣開，可離線使用</div>
+  <button class="bins" onclick="doInstall()">安裝</button>
+  <button class="bx" onclick="dismissInstall()">✕</button>
+</div>
 
 <!-- FAB 新增 -->
 <button class="fab" id="fab" onclick="openAdd()">＋</button>
@@ -358,6 +425,22 @@ label.fld{display:block;font-size:12px;color:var(--dim);margin:12px 0 5px;font-w
   </div>
 </div>
 
+<!-- ============ iOS 安裝說明 Modal ============ -->
+<div class="modal-bg" id="iosModal">
+  <div class="modal">
+    <div class="grabber"></div>
+    <h2>📲 加到 iPhone / iPad 主畫面</h2>
+    <p class="muted" style="margin:2px 0 14px">請用 <b>Safari 瀏覽器</b>開啟本頁，然後照做：</p>
+    <div style="border:1px solid var(--line);border-radius:12px;padding:4px 14px 12px;background:var(--bg)">
+      <div class="gstep"><div class="gn">1</div><div class="gt">點畫面下方（或右上角）的<b>「分享」</b>按鈕 <span style="display:inline-block;border:1.5px solid var(--primary2);border-radius:5px;padding:0 5px;color:var(--primary2);font-weight:800">⬆</span></div></div>
+      <div class="gstep"><div class="gn">2</div><div class="gt">往下捲，選 <b>「加入主畫面」</b>（Add to Home Screen）</div></div>
+      <div class="gstep"><div class="gn">3</div><div class="gt">右上角按 <b>「加入」</b>，桌面就會出現 📕 錯題本圖示</div></div>
+    </div>
+    <div class="gtip" style="margin-top:12px">💡 之後從主畫面圖示開啟，就是全螢幕 App 模式，沒有網址列、可離線用。</div>
+    <button class="btn ghost full" style="margin-top:14px" onclick="closeModal('iosModal')">知道了</button>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -406,7 +489,7 @@ function statusOf(q){if(q.mastered)return'mastered';if((q.streak||0)>0||q.review
 function go(p){
   document.querySelectorAll('section.page').forEach(s=>s.classList.remove('on'));
   $('page-'+p).classList.add('on');
-  document.querySelectorAll('nav.tabs button').forEach(b=>b.classList.toggle('on',b.dataset.p===p));
+  document.querySelectorAll('[data-p]').forEach(b=>b.classList.toggle('on',b.dataset.p===p));
   $('fab').style.display=(p==='list')?'grid':'none';
   window.scrollTo(0,0);
   if(p==='review')renderReview();
@@ -572,6 +655,7 @@ function renderList(){
   );
   list.sort((a,b)=>sort==='old'?a.createdAt-b.createdAt:b.createdAt-a.createdAt);
   const area=$('listArea');
+  area.className=listView;
   if(!DATA.length){area.innerHTML=emptyHTML('還沒有錯題','按右下角 ＋ 拍照或手動加入第一題');return}
   if(!list.length){area.innerHTML=emptyHTML('沒有符合的錯題','換個篩選條件試試');return}
   if(listView==='group'){
@@ -756,8 +840,38 @@ function doSearch(){
     :'<div class="empty" style="padding:30px"><div class="big">🔍</div>找不到「'+esc(k)+'」</div>';
 }
 
+/* ================= 安裝 App（iOS / Android）================= */
+let deferredPrompt=null;
+const isStandalone=()=>matchMedia('(display-mode: standalone)').matches||window.navigator.standalone===true;
+const isIOS=()=>/iphone|ipad|ipod/i.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+function updateInstallUI(){
+  const card=$('installCard'),done=$('installedCard'),banner=$('installBanner');
+  if(isStandalone()){card.style.display='none';done.style.display='block';banner.classList.remove('show');return}
+  done.style.display='none';
+  const canInstall=!!deferredPrompt||isIOS();
+  card.style.display=canInstall?'block':'none';
+  if(canInstall&&localStorage.getItem('cuoti_install_dismiss')!=='1'){banner.classList.add('show')}
+  else{banner.classList.remove('show')}
+}
+function dismissInstall(){localStorage.setItem('cuoti_install_dismiss','1');$('installBanner').classList.remove('show')}
+async function doInstall(){
+  if(deferredPrompt){
+    deferredPrompt.prompt();
+    const c=await deferredPrompt.userChoice;
+    deferredPrompt=null;$('installBanner').classList.remove('show');
+    if(c.outcome==='accepted')toast('安裝中… 🎉');
+    updateInstallUI();
+  }else if(isIOS()){
+    $('installBanner').classList.remove('show');openModal('iosModal');
+  }else{
+    toast('請用瀏覽器選單的「安裝／加到主畫面」');
+  }
+}
+window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredPrompt=e;updateInstallUI()});
+window.addEventListener('appinstalled',()=>{deferredPrompt=null;toast('已安裝到桌面 🎉');updateInstallUI()});
+
 /* ================= 設定 ================= */
-function loadSettingsUI(){$('setApiKey').value=settings.apiKey||'';$('setModel').value=settings.model||'gemini-2.5-flash'}
+function loadSettingsUI(){$('setApiKey').value=settings.apiKey||'';$('setModel').value=settings.model||'gemini-2.5-flash';updateInstallUI()}
 function saveSettings(){
   settings.apiKey=$('setApiKey').value.trim();
   settings.model=$('setModel').value;
@@ -810,7 +924,7 @@ async function init(){
   await openDB();
   DATA=await dbAll();
   DATA.sort((a,b)=>b.createdAt-a.createdAt);
-  initFilters();renderList();
+  initFilters();renderList();updateInstallUI();
   if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').catch(()=>{})}
 }
 // 點背景關 modal
