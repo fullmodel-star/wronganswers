@@ -135,6 +135,10 @@ label.fld{display:block;font-size:12px;color:var(--dim);margin:12px 0 5px;font-w
 .seg button.on{background:var(--primary);color:#fff}
 .notice{background:color-mix(in srgb,var(--warn) 15%,transparent);border:1px solid color-mix(in srgb,var(--warn) 40%,transparent);color:#fde68a;padding:10px 12px;border-radius:11px;font-size:13px;line-height:1.5}
 .correct{color:var(--ok);font-weight:700}.wrong{color:var(--bad);font-weight:700}
+/* 精簡模式（舊手機順一點）：關毛玻璃與動畫 */
+body.lite nav.tabs,body.lite .modal-bg,body.lite .sidebar{-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
+body.lite *{animation:none!important;transition:none!important}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.001ms!important;transition-duration:.001ms!important}}
 /* 列印錯題本 */
 #printArea{display:none}
 @media print{
@@ -210,7 +214,7 @@ label.fld{display:block;font-size:12px;color:var(--dim);margin:12px 0 5px;font-w
     <div style="font-size:26px">📕</div>
     <div style="flex:1">
       <h1>錯題管理器</h1>
-      <div class="sub">拍照辨識 · 分類 · 複習 · 學測全科</div>
+      <div class="sub">手打也行，拍照更快 · 學測全科</div>
     </div>
     <button class="iconbtn" onclick="openSearch()" title="搜尋">🔍</button>
     <button class="iconbtn" onclick="go('settings')" title="設定">⚙️</button>
@@ -233,7 +237,7 @@ label.fld{display:block;font-size:12px;color:var(--dim);margin:12px 0 5px;font-w
 <!-- ============ 錯題本（列表） ============ -->
 <section class="page on" id="page-list">
   <div id="listCountdown"></div>
-  <div class="card" style="padding:12px">
+  <div class="card" style="padding:12px" id="filterCard">
     <div class="chips" id="subjFilter"></div>
     <div class="hr" style="margin:11px 0"></div>
     <div class="row" style="gap:8px">
@@ -337,6 +341,10 @@ label.fld{display:block;font-size:12px;color:var(--dim);margin:12px 0 5px;font-w
     <h3 style="margin:0 0 4px;font-size:16px">🎯 學測日期</h3>
     <p class="muted" style="margin:4px 0 10px">設定後，首頁與統計會顯示倒數天數，幫你抓緊複習節奏。</p>
     <input id="setGsatDate" type="date" onchange="saveSettings()">
+    <label class="fld" style="display:flex;align-items:center;gap:8px;margin-top:14px;cursor:pointer">
+      <input id="setLite" type="checkbox" style="width:auto" onchange="saveSettings()">
+      <span>精簡模式（舊手機順一點：關閉毛玻璃與動畫）</span>
+    </label>
   </div>
 
   <div class="card">
@@ -366,7 +374,7 @@ label.fld{display:block;font-size:12px;color:var(--dim);margin:12px 0 5px;font-w
       錯題管理器 v1.0 · 學測全科通用<br>
       國文 · 英文 · 數學 · 自然 · 社會<br>
       離線可用，只有拍照辨識需連網。<br>
-      連對 2 次即畢業（精熟）。
+      連對 3 次即畢業（精熟）。
     </p>
   </div>
 </section>
@@ -424,7 +432,7 @@ label.fld{display:block;font-size:12px;color:var(--dim);margin:12px 0 5px;font-w
       <!-- 表單 -->
       <label class="fld">科目 *</label>
       <div class="chips" id="fSubject"></div>
-      <label class="fld" style="color:var(--primary2);font-weight:800">🎯 主題 / 知識點 *（分類主軸）</label>
+      <label class="fld" style="color:var(--primary2);font-weight:800">🎯 主題 / 知識點（分類主軸，建議填）</label>
       <input id="fChapter" list="topicList" placeholder="例：三角函數、氧化還原、文言文虛詞…">
       <datalist id="topicList"></datalist>
       <div class="muted" style="font-size:11.5px;margin-top:4px">這題考的觀念是什麼？之後就靠它分類、篩選、依主題複習。輸入時會提示你已建立的主題。</div>
@@ -524,9 +532,9 @@ function dbClear(){return new Promise((res,rej)=>{const t=tx('readwrite');t.obje
 
 /* ================= 常數 ================= */
 const SUBJECTS=['國文','英文','數學','自然','社會','其他'];
-const CAUSES=['觀念不熟','計算錯誤','看錯題目','粗心','時間不夠','完全不會','陷阱題'];
+const CAUSES=['觀念不熟','計算錯誤','看錯題目','粗心','時間不夠','完全不會','陷阱題','記混/混淆','文意理解錯','關鍵字漏看','年代/名詞背錯','字音字形'];
 const SETTINGS_KEY='cuoti_settings';
-let settings={apiKey:'',model:'gemini-2.5-flash',gsatDate:''};
+let settings={apiKey:'',model:'gemini-2.5-flash',gsatDate:'',lite:false};
 
 /* ================= 工具 ================= */
 const $=id=>document.getElementById(id);
@@ -617,7 +625,7 @@ function refreshTopicList(){const dl=$('topicList');if(dl)dl.innerHTML=allTopics
 function openAdd(){
   editingId=null;pendingImg=null;pendingFigure=false;
   $('addTitle').textContent='新增錯題';
-  buildChips($('fSubject'),SUBJECTS,'數學');
+  buildChips($('fSubject'),SUBJECTS,(localStorage.getItem('cuoti_lastsubj')||'數學'));
   buildChips($('fCause'),CAUSES,'',null,true);
   ['fChapter','fType','fQuestion','fMyAns','fAns','fExplain','fSource'].forEach(i=>$(i).value='');
   $('fDiff').value='中';
@@ -675,8 +683,14 @@ function clearPhoto(){pendingImg=null;pendingMime='image/jpeg';$('photoEmpty').s
 
 /* ============ Gemini 辨識 ============ */
 async function recognize(){
-  if(!settings.apiKey){toast('請先到設定填入 Gemini API 金鑰');go('settings');closeModal('addModal');return}
   if(!pendingImg){toast('請先選擇照片');return}
+  if(!settings.apiKey){
+    // 不清空、不踢人：當場提示，照片與已填內容都保留
+    $('recogStatus').innerHTML='<span style="color:var(--warn)">拍照辨識需要一組免費金鑰（一次性設定）。</span><br>'+
+      '<span class="muted">你可以先<b>手動打字</b>把這題存起來（照片已保留），或現在去設定。</span><br>'+
+      '<button class="btn sm" style="margin-top:8px" onclick="go(\'settings\');closeModal(\'addModal\')">⚙️ 去設定金鑰（免費）</button>';
+    return;
+  }
   const btn=$('recogBtn');btn.disabled=true;
   $('recogStatus').innerHTML='<span class="spinner"></span> AI 辨識中，請稍候…';
   try{
@@ -761,6 +775,7 @@ async function saveQuestion(){
     toast(/quota/i.test(err&&err.name||'')?'❌ 儲存空間已滿，請先匯出備份並刪除舊題':'❌ 儲存失敗：'+((err&&err.message)||'請重試'));
     return; // 不關視窗、不更新記憶體，避免以為存了其實沒存
   }
+  try{localStorage.setItem('cuoti_lastsubj',subject)}catch(e){}
   if(isNew){DATA.unshift(q)}else{const i=DATA.findIndex(x=>x.id===editingId);if(i>-1)DATA[i]=q}
   closeModal('addModal');
   toast(isNew?'已加入錯題本 📚':'已更新');
@@ -799,7 +814,20 @@ function renderList(){
   list.sort((a,b)=>sort==='old'?a.createdAt-b.createdAt:b.createdAt-a.createdAt);
   const area=$('listArea');
   area.className=listView;
-  if(!DATA.length){area.innerHTML=emptyHTML('還沒有錯題','按右下角 ＋ 拍照或手動加入第一題');return}
+  const fc=$('filterCard');
+  if(!DATA.length){
+    if(fc)fc.style.display='none'; // 空清單先藏篩選器
+    area.innerHTML=`<div class="card" style="text-align:center;padding:26px 16px">
+      <div style="font-size:46px">📕</div>
+      <div style="font-size:18px;font-weight:800;margin-top:6px">開始建立你的錯題本</div>
+      <p class="muted" style="margin:8px auto 16px;max-width:16em">手打就能用，不用任何設定；想更快可拍照讓 AI 自動辨識。</p>
+      <button class="btn full" onclick="openAdd()">✏️ 手動加第一題</button>
+      <button class="btn ghost full" style="margin-top:8px" onclick="go('settings')">📷 設定拍照辨識（免費）</button>
+      <div class="muted" style="margin-top:16px;font-size:12px;line-height:1.7">加進來的錯題會依「主題／知識點」自動分類，<br>之後能搜尋、間隔複習、印成考卷反覆練。</div>
+    </div>`;
+    return;
+  }
+  if(fc)fc.style.display='';
   if(!list.length){area.innerHTML=emptyHTML('沒有符合的錯題','換個篩選條件試試');return}
   if(listView==='group'){
     const groups={};
@@ -1052,13 +1080,16 @@ function bar(name,val,max,color){
 
 /* ================= 搜尋 ================= */
 function openSearch(){openModal('searchModal');$('searchInput').value='';$('searchResults').innerHTML='';setTimeout(()=>$('searchInput').focus(),200)}
+function normText(s){return (s||'').toLowerCase()
+  .replace(/臺/g,'台').replace(/[！-～]/g,c=>String.fromCharCode(c.charCodeAt(0)-0xFEE0)); // 臺→台、全形→半形
+}
 function doSearch(){
-  const k=$('searchInput').value.trim().toLowerCase();
+  const k=normText($('searchInput').value.trim());
   if(!k){$('searchResults').innerHTML='';return}
-  const res=DATA.filter(q=>[q.question,q.explain,q.chapter,q.source,q.subject,q.type,q.ans,q.cause].join(' ').toLowerCase().includes(k));
+  const res=DATA.filter(q=>normText([q.question,q.explain,q.chapter,q.source,q.subject,q.type,q.ans,q.myAns,q.cause].join(' ')).includes(k));
   $('searchResults').innerHTML=res.length?
-    `<div class="muted" style="margin-bottom:8px">找到 ${res.length} 題</div>`+res.slice(0,50).map(qcardHTML).join('')
-    :'<div class="empty" style="padding:30px"><div class="big">🔍</div>找不到「'+esc(k)+'」</div>';
+    `<div class="muted" style="margin-bottom:8px">找到 ${res.length} 題${res.length>80?'（顯示前 80）':''}</div>`+res.slice(0,80).map(qcardHTML).join('')
+    :'<div class="empty" style="padding:30px"><div class="big">🔍</div>找不到「'+esc($('searchInput').value.trim())+'」</div>';
 }
 
 /* ================= 安裝 App（iOS / Android）================= */
@@ -1092,11 +1123,14 @@ window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredPro
 window.addEventListener('appinstalled',()=>{deferredPrompt=null;toast('已安裝到桌面 🎉');updateInstallUI()});
 
 /* ================= 設定 ================= */
-function loadSettingsUI(){$('setApiKey').value=settings.apiKey||'';$('setModel').value=settings.model||'gemini-2.5-flash';$('setGsatDate').value=settings.gsatDate||'';updateInstallUI()}
+function loadSettingsUI(){$('setApiKey').value=settings.apiKey||'';$('setModel').value=settings.model||'gemini-2.5-flash';$('setGsatDate').value=settings.gsatDate||'';$('setLite').checked=!!settings.lite;updateInstallUI()}
+function applyLite(){document.body.classList.toggle('lite',!!settings.lite)}
 function saveSettings(){
   settings.apiKey=$('setApiKey').value.trim();
   settings.model=$('setModel').value;
   settings.gsatDate=$('setGsatDate').value||'';
+  settings.lite=$('setLite').checked;
+  applyLite();
   localStorage.setItem(SETTINGS_KEY,JSON.stringify(settings));
   toast('設定已儲存 💾');
 }
@@ -1114,11 +1148,15 @@ async function testKey(){
 /* ================= 列印錯題本 ================= */
 function printBook(hideAns){
   if(!DATA.length){toast('還沒有錯題可列印');return}
-  // 依科目→主題分組
+  // 吃錯題本目前的篩選（科目/主題/狀態）
+  const fSubj=curSubjFilter, fTopic=($('filterTopic')||{}).value||'', fStatus=($('filterStatus')||{}).value||'';
+  let pool=DATA.filter(q=>(!fSubj||q.subject===fSubj)&&(!fTopic||q.chapter===fTopic)&&(!fStatus||statusOf(q)===fStatus));
+  if(!pool.length){toast('目前篩選沒有題目可印，請調整篩選');return}
+  const scopeTxt=[fSubj,fTopic,({review:'待複習',learning:'複習中',mastered:'已精熟'}[fStatus])].filter(Boolean).join('·')||'全部';
   const groups={};
-  const sorted=DATA.slice().sort((a,b)=>{const s=SUBJECTS.indexOf(a.subject)-SUBJECTS.indexOf(b.subject);return s||((a.chapter||'').localeCompare(b.chapter||'','zh'))});
+  const sorted=pool.slice().sort((a,b)=>{const s=SUBJECTS.indexOf(a.subject)-SUBJECTS.indexOf(b.subject);return s||((a.chapter||'').localeCompare(b.chapter||'','zh'))});
   sorted.forEach(q=>{const k=q.subject+'　／　'+(q.chapter||'未分類');(groups[k]=groups[k]||[]).push(q)});
-  let html=`<h1>📕 我的錯題本${hideAns?'（考卷版）':''}</h1><div class="pmeta">共 ${DATA.length} 題 · 列印日 ${new Date().toLocaleDateString()}${hideAns?' · 答案已隱藏，寫完再對照 App':''}</div>`;
+  let html=`<h1>📕 我的錯題本${hideAns?'（考卷版）':''}</h1><div class="pmeta">範圍：${esc(scopeTxt)} · 共 ${pool.length} 題 · 列印日 ${new Date().toLocaleDateString()}${hideAns?' · 答案已隱藏，寫完再對照 App':''}</div>`;
   let n=0;
   Object.keys(groups).forEach(k=>{
     html+=`<div class="ptopic">${esc(k.replace('　／　','　·　'))}（${groups[k].length}）</div>`;
@@ -1208,7 +1246,7 @@ async function wipeAll(){
 /* ================= 啟動 ================= */
 async function init(){
   try{settings=Object.assign(settings,JSON.parse(localStorage.getItem(SETTINGS_KEY)||'{}'))}catch(e){}
-  loadStreak();
+  loadStreak();applyLite();
   // 申請持久化儲存，降低錯題被系統清除的風險
   try{if(navigator.storage&&navigator.storage.persist)await navigator.storage.persist()}catch(e){}
   try{
