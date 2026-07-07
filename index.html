@@ -135,6 +135,24 @@ label.fld{display:block;font-size:12px;color:var(--dim);margin:12px 0 5px;font-w
 .seg button.on{background:var(--primary);color:#fff}
 .notice{background:color-mix(in srgb,var(--warn) 15%,transparent);border:1px solid color-mix(in srgb,var(--warn) 40%,transparent);color:#fde68a;padding:10px 12px;border-radius:11px;font-size:13px;line-height:1.5}
 .correct{color:var(--ok);font-weight:700}.wrong{color:var(--bad);font-weight:700}
+/* 列印錯題本 */
+#printArea{display:none}
+@media print{
+  body{background:#fff!important;color:#000!important;padding:0!important}
+  body>*{display:none!important}
+  #printArea{display:block!important;padding:0 4mm}
+  #printArea *{color:#000!important}
+  #printArea h1{font-size:18px;margin:0 0 4px}
+  #printArea .pmeta{font-size:11px;color:#555!important;margin-bottom:10px}
+  #printArea .ptopic{font-weight:800;font-size:14px;margin:14px 0 6px;border-bottom:2px solid #000;padding-bottom:2px}
+  #printArea .pq{border:1px solid #999;border-radius:6px;padding:8px 10px;margin:8px 0;break-inside:avoid;page-break-inside:avoid}
+  #printArea .pq .qn{font-weight:700;font-size:12px;color:#666!important}
+  #printArea .pq .qt{white-space:pre-wrap;margin:3px 0;font-size:13px}
+  #printArea .pq img{max-width:80mm;max-height:60mm;display:block;margin:5px 0}
+  #printArea .pans{font-size:12.5px;margin-top:5px}
+  #printArea .pans b{color:#000!important}
+  #printArea .pexp{font-size:12px;color:#333!important;white-space:pre-wrap;margin-top:3px}
+}
 /* 內頁教學 */
 .guide{margin-top:12px;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--bg)}
 .guide>summary{padding:12px 14px;font-weight:700;font-size:14px;cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;gap:8px;color:var(--primary2)}
@@ -214,12 +232,13 @@ label.fld{display:block;font-size:12px;color:var(--dim);margin:12px 0 5px;font-w
 
 <!-- ============ 錯題本（列表） ============ -->
 <section class="page on" id="page-list">
+  <div id="listCountdown"></div>
   <div class="card" style="padding:12px">
     <div class="chips" id="subjFilter"></div>
     <div class="hr" style="margin:11px 0"></div>
     <div class="row" style="gap:8px">
-      <select id="filterCause" onchange="renderList()">
-        <option value="">全部錯因</option>
+      <select id="filterTopic" onchange="renderList()">
+        <option value="">全部主題</option>
       </select>
       <select id="filterStatus" onchange="renderList()">
         <option value="">全部狀態</option>
@@ -227,14 +246,14 @@ label.fld{display:block;font-size:12px;color:var(--dim);margin:12px 0 5px;font-w
         <option value="learning">複習中</option>
         <option value="mastered">已精熟</option>
       </select>
-      <select id="sortBy" onchange="renderList()" style="max-width:110px">
+      <select id="sortBy" onchange="renderList()" style="max-width:100px">
         <option value="new">最新</option>
         <option value="old">最舊</option>
       </select>
     </div>
     <div class="seg" style="margin-top:10px" id="viewSeg">
-      <button class="on" data-v="flat" onclick="setView('flat')">📋 列表</button>
-      <button data-v="group" onclick="setView('group')">🗂️ 按章節分組</button>
+      <button data-v="flat" onclick="setView('flat')">📋 列表</button>
+      <button class="on" data-v="group" onclick="setView('group')">🎯 按主題分組</button>
     </div>
   </div>
   <div id="listArea"></div>
@@ -247,19 +266,25 @@ label.fld{display:block;font-size:12px;color:var(--dim);margin:12px 0 5px;font-w
 
 <!-- ============ 統計 ============ -->
 <section class="page" id="page-stats">
+  <div id="statCountdown"></div>
   <div class="stat-grid" id="statTop"></div>
   <div class="card" style="margin-top:14px">
-    <h3 style="margin:0 0 12px;font-size:16px">📊 各科錯題分布</h3>
-    <div id="statSubject"></div>
+    <h3 style="margin:0 0 4px;font-size:16px">🎯 弱點主題（錯最多）</h3>
+    <p class="muted" style="margin:0 0 12px;font-size:12px">點主題即可只複習這個主題的錯題</p>
+    <div id="statTopic"></div>
   </div>
   <div class="card">
-    <h3 style="margin:0 0 12px;font-size:16px">🎯 錯因分析</h3>
-    <div id="statCause"></div>
+    <h3 style="margin:0 0 12px;font-size:16px">📊 各科錯題分布</h3>
+    <div id="statSubject"></div>
   </div>
   <div class="card">
     <h3 style="margin:0 0 12px;font-size:16px">🔥 複習進度</h3>
     <div id="statProgress"></div>
   </div>
+  <details class="guide" style="background:var(--card)">
+    <summary>📉 錯因分析（次要參考）</summary>
+    <div class="gbody"><div id="statCause"></div></div>
+  </details>
 </section>
 
 <!-- ============ 設定 ============ -->
@@ -306,6 +331,21 @@ label.fld{display:block;font-size:12px;color:var(--dim);margin:12px 0 5px;font-w
         <div class="gtip">🔒 <b>安全</b>：金鑰等於你 Google 帳號的鑰匙，別貼到群組或公開網頁；萬一外流，回 AI Studio 刪掉重建一把即可。<br>❓ <b>沒金鑰也能用</b>：可純手動輸入題目，一樣能分類、搜尋、複習。</div>
       </div>
     </details>
+  </div>
+
+  <div class="card">
+    <h3 style="margin:0 0 4px;font-size:16px">🎯 學測日期</h3>
+    <p class="muted" style="margin:4px 0 10px">設定後，首頁與統計會顯示倒數天數，幫你抓緊複習節奏。</p>
+    <input id="setGsatDate" type="date" onchange="saveSettings()">
+  </div>
+
+  <div class="card">
+    <h3 style="margin:0 0 4px;font-size:16px">🖨️ 列印 / 匯出錯題本</h3>
+    <p class="muted" style="margin:4px 0 10px">產生可列印的錯題本（依主題排列）。在列印畫面選「另存為 PDF」即可存檔。</p>
+    <div class="row">
+      <button class="btn ghost sm" onclick="printBook(false)">📄 完整版（含答案）</button>
+      <button class="btn ghost sm" onclick="printBook(true)">📝 遮答案版（當考卷）</button>
+    </div>
   </div>
 
   <div class="card">
@@ -384,8 +424,10 @@ label.fld{display:block;font-size:12px;color:var(--dim);margin:12px 0 5px;font-w
       <!-- 表單 -->
       <label class="fld">科目 *</label>
       <div class="chips" id="fSubject"></div>
-      <label class="fld">子科目 / 章節</label>
-      <input id="fChapter" placeholder="例：三角函數、氧化還原、宋代政治…">
+      <label class="fld" style="color:var(--primary2);font-weight:800">🎯 主題 / 知識點 *（分類主軸）</label>
+      <input id="fChapter" list="topicList" placeholder="例：三角函數、氧化還原、文言文虛詞…">
+      <datalist id="topicList"></datalist>
+      <div class="muted" style="font-size:11.5px;margin-top:4px">這題考的觀念是什麼？之後就靠它分類、篩選、依主題複習。輸入時會提示你已建立的主題。</div>
       <div class="row">
         <div><label class="fld">題型</label><input id="fType" placeholder="單選/計算/閱讀…"></div>
         <div><label class="fld">難度</label>
@@ -400,7 +442,7 @@ label.fld{display:block;font-size:12px;color:var(--dim);margin:12px 0 5px;font-w
       </div>
       <label class="fld">詳解 / 解析</label>
       <textarea id="fExplain" placeholder="為什麼選這個答案（AI 會自動生成，可修改）"></textarea>
-      <label class="fld">錯因</label>
+      <label class="fld">錯因（選填，做完檢討再補即可）</label>
       <div class="chips" id="fCause"></div>
       <label class="fld">來源 / 標籤</label>
       <input id="fSource" placeholder="例：112學測、翰林講義p.45、複習卷3">
@@ -444,6 +486,14 @@ label.fld{display:block;font-size:12px;color:var(--dim);margin:12px 0 5px;font-w
   </div>
 </div>
 
+<!-- 列印用容器（螢幕隱藏，僅列印時顯示） -->
+<div id="printArea"></div>
+
+<!-- ============ AI 變式題 Modal ============ -->
+<div class="modal-bg" id="varModal">
+  <div class="modal" id="varBody"></div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -476,7 +526,7 @@ function dbClear(){return new Promise((res,rej)=>{const t=tx('readwrite');t.obje
 const SUBJECTS=['國文','英文','數學','自然','社會','其他'];
 const CAUSES=['觀念不熟','計算錯誤','看錯題目','粗心','時間不夠','完全不會','陷阱題'];
 const SETTINGS_KEY='cuoti_settings';
-let settings={apiKey:'',model:'gemini-2.5-flash'};
+let settings={apiKey:'',model:'gemini-2.5-flash',gsatDate:''};
 
 /* ================= 工具 ================= */
 const $=id=>document.getElementById(id);
@@ -487,16 +537,57 @@ function fmtDate(t){const d=new Date(t);return `${d.getMonth()+1}/${d.getDate()}
 function toast(msg){const t=$('toast');t.textContent=msg;t.classList.add('on');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('on'),2200)}
 function esc(s){return (s==null?'':''+s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function safeImg(u){return (typeof u==='string'&&/^data:image\//.test(u))?u:''}
+/* 照片以 Blob 存 IndexedDB（省記憶體，渲染用物件URL；向下相容舊的 base64 字串） */
+const _urls=new Map();
+function imgURL(q){
+  const im=q&&q.image;if(!im)return '';
+  if(typeof im==='string')return /^data:image\//.test(im)?im:'';
+  if(im instanceof Blob){
+    if(_urls.has(q.id))return _urls.get(q.id);
+    const u=URL.createObjectURL(im);_urls.set(q.id,u);return u;
+  }
+  return '';
+}
+function dropURL(id){if(_urls.has(id)){try{URL.revokeObjectURL(_urls.get(id))}catch(e){}_urls.delete(id)}}
+function dataURLtoBlob(d){
+  try{const c=d.indexOf(',');const mime=(d.slice(5,c).split(';')[0])||'image/jpeg';const bin=atob(d.slice(c+1));const u=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);return new Blob([u],{type:mime})}catch(e){return null}
+}
+function blobToDataURL(b){return new Promise(r=>{const fr=new FileReader();fr.onload=()=>r(fr.result);fr.onerror=()=>r(null);fr.readAsDataURL(b)})}
 function statusOf(q){if(q.mastered)return'mastered';if((q.streak||0)>0||q.reviewCount>0)return'learning';return'review'}
+/* 連續複習天數（存 localStorage） */
+function ymd(d){return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate()}
+let streakData={last:'',count:0};
+function loadStreak(){try{const s=JSON.parse(localStorage.getItem('cuoti_streak')||'null');if(s)streakData=s}catch(e){}}
+function bumpStreak(){
+  const t=ymd(new Date());if(streakData.last===t)return;
+  const y=new Date();y.setDate(y.getDate()-1);
+  streakData.count=(streakData.last===ymd(y))?(streakData.count||0)+1:1;
+  streakData.last=t;
+  try{localStorage.setItem('cuoti_streak',JSON.stringify(streakData))}catch(e){}
+}
+function curStreak(){const t=ymd(new Date());const y=new Date();y.setDate(y.getDate()-1);return (streakData.last===t||streakData.last===ymd(y))?(streakData.count||0):0}
+function streakBadge(){return `<span class="pill" style="background:color-mix(in srgb,#f97316 22%,transparent);border-color:#f9731566">🔥 連續複習 ${curStreak()} 天</span>`}
+/* 學測倒數 */
+function renderCountdown(elId){
+  const el=$(elId);if(!el)return;
+  const d=settings.gsatDate;
+  if(!d){el.innerHTML='';return}
+  const target=new Date(d+'T00:00:00').getTime();
+  const days=Math.ceil((target-today())/86400000);
+  el.innerHTML=`<div class="card" style="text-align:center;background:linear-gradient(135deg,#4f46e5,#7c3aed);border:none;color:#fff;padding:12px;margin-bottom:14px">
+    <div style="font-size:12px;opacity:.85">距離學測（${esc(d)}）</div>
+    <div style="font-size:30px;font-weight:800;line-height:1.15">${days>0?'還有 '+days+' 天':(days===0?'就是今天！加油 💪':'學測已過')}</div>
+  </div>`;
+}
 
 /* ================= 導航 ================= */
-function go(p){
+function go(p,keepScope){
   document.querySelectorAll('section.page').forEach(s=>s.classList.remove('on'));
   $('page-'+p).classList.add('on');
   document.querySelectorAll('[data-p]').forEach(b=>b.classList.toggle('on',b.dataset.p===p));
   $('fab').style.display=(p==='list')?'grid':'none';
   window.scrollTo(0,0);
-  if(p==='review')renderReview();
+  if(p==='review'){if(!keepScope)reviewScope=null;buildReviewQueue();}
   if(p==='stats')renderStats();
   if(p==='settings')loadSettingsUI();
 }
@@ -506,38 +597,46 @@ function closeModal(id){$(id).classList.remove('on');document.body.style.overflo
 /* ================= 新增/編輯 ================= */
 let editingId=null, pendingImg=null, pendingFigure=false, pendingMime='image/jpeg';
 
-function buildChips(el,items,current,cb){
+function buildChips(el,items,current,cb,optional){
   el.innerHTML='';
   items.forEach(it=>{
     const c=document.createElement('div');
     c.className='chip'+(it===current?' on':'');
-    c.textContent=it;c.onclick=()=>{el.querySelectorAll('.chip').forEach(x=>x.classList.remove('on'));c.classList.add('on');cb&&cb(it)};
+    c.textContent=it;c.onclick=()=>{
+      const wasOn=c.classList.contains('on');
+      el.querySelectorAll('.chip').forEach(x=>x.classList.remove('on'));
+      if(!(optional&&wasOn)){c.classList.add('on');cb&&cb(it)} // 選填時再點一次可取消
+    };
     el.appendChild(c);
   });
 }
 function selectedChip(el){const c=el.querySelector('.chip.on');return c?c.textContent:''}
+function allTopics(){return [...new Set(DATA.map(q=>q.chapter).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'zh'))}
+function refreshTopicList(){const dl=$('topicList');if(dl)dl.innerHTML=allTopics().map(t=>`<option value="${esc(t)}">`).join('')}
 
 function openAdd(){
   editingId=null;pendingImg=null;pendingFigure=false;
   $('addTitle').textContent='新增錯題';
   buildChips($('fSubject'),SUBJECTS,'數學');
-  buildChips($('fCause'),CAUSES,'觀念不熟');
+  buildChips($('fCause'),CAUSES,'',null,true);
   ['fChapter','fType','fQuestion','fMyAns','fAns','fExplain','fSource'].forEach(i=>$(i).value='');
   $('fDiff').value='中';
+  refreshTopicList();
   clearPhoto();
   openModal('addModal');
 }
 function openEdit(id){
   const q=DATA.find(x=>x.id===id);if(!q)return;
   editingId=id;pendingImg=q.image||null;pendingFigure=!!q.hasFigure;
-  pendingMime=(q.image&&q.image.indexOf('data:')===0)?(q.image.slice(5,q.image.indexOf(',')).split(';')[0]||'image/jpeg'):'image/jpeg';
+  pendingMime=(pendingImg instanceof Blob)?(pendingImg.type||'image/jpeg'):((typeof pendingImg==='string'&&pendingImg.indexOf('data:')===0)?(pendingImg.slice(5,pendingImg.indexOf(',')).split(';')[0]||'image/jpeg'):'image/jpeg');
   $('addTitle').textContent='編輯錯題';
   buildChips($('fSubject'),SUBJECTS,q.subject);
-  buildChips($('fCause'),CAUSES,q.cause);
+  buildChips($('fCause'),CAUSES,q.cause,null,true);
+  refreshTopicList();
   $('fChapter').value=q.chapter||'';$('fType').value=q.type||'';$('fDiff').value=q.diff||'中';
   $('fQuestion').value=q.question||'';$('fMyAns').value=q.myAns||'';$('fAns').value=q.ans||'';
   $('fExplain').value=q.explain||'';$('fSource').value=q.source||'';
-  if(q.image){showPreview(q.image)}else{clearPhoto()}
+  if(q.image){showPreview(imgURL(q))}else{clearPhoto()}
   closeModal('viewModal');openModal('addModal');
 }
 
@@ -581,9 +680,11 @@ async function recognize(){
   const btn=$('recogBtn');btn.disabled=true;
   $('recogStatus').innerHTML='<span class="spinner"></span> AI 辨識中，請稍候…';
   try{
-    const comma=pendingImg.indexOf(',');
-    const base64=pendingImg.slice(comma+1);
-    const mime=(pendingImg.slice(5,comma).split(';')[0])||pendingMime||'image/jpeg';
+    const dataUrl=(pendingImg instanceof Blob)?await blobToDataURL(pendingImg):pendingImg;
+    if(!dataUrl)throw new Error('讀取照片失敗');
+    const comma=dataUrl.indexOf(',');
+    const base64=dataUrl.slice(comma+1);
+    const mime=(dataUrl.slice(5,comma).split(';')[0])||pendingMime||'image/jpeg';
     const knownCh=[...new Set(DATA.map(q=>q.chapter).filter(Boolean))];
     const chapterHint=knownCh.length?`\n重要：若本題主題與下列「既有章節」相同，請務必沿用完全相同的名稱以利歸類，不要另創近義詞：${knownCh.join('、')}。` : '';
     const prompt=`你是台灣高中學測的解題老師。這張圖片是一題學生做錯的考題，可能含圖形（幾何圖、函數圖、圖表、電路、化學結構、地圖等）。請辨識並以繁體中文回傳 JSON（只回 JSON，不要多餘文字），欄位：
@@ -640,16 +741,21 @@ async function saveQuestion(){
   if(!question&&!pendingImg){toast('請填題目或加照片');return}
   const now=Date.now();
   const isNew=!editingId;
+  // 照片統一存成 Blob（省記憶體）；新拍的是 dataURL→轉 Blob，未改動的維持原樣
+  let imageToStore=null;
+  if(pendingImg instanceof Blob)imageToStore=pendingImg;
+  else if(typeof pendingImg==='string'&&pendingImg.indexOf('data:')===0)imageToStore=dataURLtoBlob(pendingImg)||pendingImg;
   let q;
   if(editingId){q=Object.assign({},DATA.find(x=>x.id===editingId))}else{q={id:uid(),createdAt:now,streak:0,reviewCount:0,mastered:false,nextReview:today()}}
   Object.assign(q,{
     subject,chapter:$('fChapter').value.trim(),type:$('fType').value.trim(),diff:$('fDiff').value,
     question,myAns:$('fMyAns').value.trim(),ans:$('fAns').value.trim(),
     explain:$('fExplain').value.trim(),cause:selectedChip($('fCause')),source:$('fSource').value.trim(),
-    image:pendingImg||null,hasFigure:pendingFigure,updatedAt:now
+    image:imageToStore,hasFigure:pendingFigure,updatedAt:now
   });
   try{
     await dbPut(q);
+    dropURL(q.id); // 照片可能換了，清舊物件URL讓列表重建
   }catch(err){
     console.error(err);
     toast(/quota/i.test(err&&err.name||'')?'❌ 儲存空間已滿，請先匯出備份並刪除舊題':'❌ 儲存失敗：'+((err&&err.message)||'請重試'));
@@ -674,16 +780,20 @@ function initFilters(){
     c.onclick=()=>{curSubjFilter=o.k;initFilters();renderList()};
     sf.appendChild(c);
   });
-  const fc=$('filterCause');
-  if(fc.options.length<=1)CAUSES.forEach(c=>fc.add(new Option(c,c)));
+  // 主題篩選：依目前科目動態更新選項
+  const ft=$('filterTopic');const prev=ft.value;
+  const topics=[...new Set(DATA.filter(q=>!curSubjFilter||q.subject===curSubjFilter).map(q=>q.chapter).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'zh'));
+  ft.innerHTML='<option value="">全部主題</option>'+topics.map(t=>`<option value="${esc(t)}">${esc(t)}</option>`).join('');
+  ft.value=topics.includes(prev)?prev:'';
 }
 function subjClass(s){return {'國文':'chi','英文':'eng','數學':'math','自然':'sci','社會':'soc'}[s]||'other'}
 
 function renderList(){
-  const cause=$('filterCause').value, status=$('filterStatus').value, sort=$('sortBy').value;
+  renderCountdown('listCountdown');
+  const topic=$('filterTopic').value, status=$('filterStatus').value, sort=$('sortBy').value;
   let list=DATA.filter(q=>
     (!curSubjFilter||q.subject===curSubjFilter)&&
-    (!cause||q.cause===cause)&&
+    (!topic||q.chapter===topic)&&
     (!status||statusOf(q)===status)
   );
   list.sort((a,b)=>sort==='old'?a.createdAt-b.createdAt:b.createdAt-a.createdAt);
@@ -699,17 +809,21 @@ function renderList(){
       return sa!==sb?sa-sb:a.localeCompare(b,'zh');
     });
     area.innerHTML=keys.map(k=>{
-      const subj=k.split('　／　')[0];
+      const subj=k.split('　／　')[0], topic=k.split('　／　')[1];
+      const items=groups[k];
+      const due=items.filter(q=>!q.mastered).length;
       return `<div style="margin:16px 4px 8px;display:flex;align-items:center;gap:8px">
         <span class="dot" style="background:var(--s-${subjClass(subj)})"></span>
-        <b style="font-size:15px">${esc(k)}</b><span class="muted" style="font-size:12px">（${groups[k].length}）</span></div>`
-        +groups[k].map(qcardHTML).join('');
+        <b style="font-size:15px">${esc(k)}</b><span class="muted" style="font-size:12px">（${items.length}）</span>
+        <span style="flex:1"></span>
+        ${due?`<button class="btn sm" style="padding:5px 11px;font-size:12px" onclick="reviewTopic('${esc(subj)}','${esc(topic==='未分類'?'':topic)}')">🔥 複習這主題 ${due}</button>`:'<span class="mastered-badge">✓ 全精熟</span>'}</div>`
+        +items.map(qcardHTML).join('');
     }).join('');
     return;
   }
   area.innerHTML=list.map(qcardHTML).join('');
 }
-let listView='flat';
+let listView='group';
 function setView(v){listView=v;document.querySelectorAll('#viewSeg button').forEach(b=>b.classList.toggle('on',b.dataset.v===v));renderList()}
 function emptyHTML(t,s){return `<div class="empty"><div class="big">📭</div><div style="font-size:16px;font-weight:700;color:var(--txt)">${t}</div><div style="margin-top:6px">${s}</div></div>`}
 
@@ -725,7 +839,7 @@ function qcardHTML(q){
       <span style="flex:1"></span>${stBadge}
     </div>
     <div class="qtext grad">${esc(q.question)||'<span class="muted">（僅照片）</span>'}</div>
-    ${safeImg(q.image)?`<img class="thumb" src="${esc(safeImg(q.image))}" loading="lazy">`:''}
+    ${imgURL(q)?`<img class="thumb" src="${esc(imgURL(q))}" loading="lazy">`:''}
     <div class="muted" style="margin-top:8px;font-size:11px">${fmtDate(q.createdAt)}${q.source?' · '+esc(q.source):''}</div>
   </div>`;
 }
@@ -742,7 +856,7 @@ function viewQ(id){
       <span class="tag">難度 ${esc(q.diff||'中')}</span>
       ${q.mastered?'<span class="mastered-badge">✓ 精熟</span>':''}
     </div>
-    ${safeImg(q.image)?`<img src="${esc(safeImg(q.image))}" style="width:100%;border-radius:12px;margin-bottom:12px;background:#0008" onclick="window.open(this.src)">`:''}
+    ${imgURL(q)?`<img src="${esc(imgURL(q))}" style="width:100%;border-radius:12px;margin-bottom:12px;background:#0008" onclick="window.open(this.src)">`:''}
     ${q.question?`<div class="card" style="background:var(--bg)"><b>📝 題目</b><div style="margin-top:6px;line-height:1.7;white-space:pre-wrap">${esc(q.question)}</div></div>`:''}
     <div class="row">
       ${q.myAns?`<div class="card" style="background:var(--bg);text-align:center"><div class="muted" style="font-size:12px">我的答案</div><div class="wrong" style="font-size:18px;margin-top:3px">${esc(q.myAns)}</div></div>`:''}
@@ -752,6 +866,7 @@ function viewQ(id){
     ${q.cause?`<span class="pill">⚠️ ${esc(q.cause)}</span> `:''}
     ${q.source?`<span class="pill">🏷️ ${esc(q.source)}</span>`:''}
     <div class="muted" style="margin:12px 0;font-size:12px">加入於 ${new Date(q.createdAt).toLocaleDateString()} · 複習 ${q.reviewCount||0} 次 · 連對 ${q.streak||0}</div>
+    <button class="btn full" style="margin-bottom:8px;background:linear-gradient(135deg,#6366f1,#a855f7)" onclick="genVariation('${esc(q.id)}')">🔄 出一題類似的考我</button>
     <div class="row">
       <button class="btn ghost" onclick="openEdit('${esc(q.id)}')">✏️ 編輯</button>
       <button class="btn bad" onclick="delQ('${esc(q.id)}')">🗑️ 刪除</button>
@@ -763,63 +878,119 @@ function viewQ(id){
 async function delQ(id){
   if(!confirm('確定刪除這題？'))return;
   try{await dbDel(id)}catch(err){toast('刪除失敗：'+((err&&err.message)||'請重試'));return}
-  DATA=DATA.filter(x=>x.id!==id);
+  DATA=DATA.filter(x=>x.id!==id);dropURL(id);
   closeModal('viewModal');renderList();toast('已刪除');
 }
 
-/* ================= 複習（間隔重現 + 連對2次畢業）================= */
+/* ================= AI 變式題（出一題類似的）================= */
+let varData=null;
+async function genVariation(id){
+  const q=DATA.find(x=>x.id===id);if(!q)return;
+  if(!settings.apiKey){toast('需要 Gemini 金鑰才能出題');go('settings');closeModal('viewModal');return}
+  closeModal('viewModal');
+  $('varBody').innerHTML=`<div class="grabber"></div><h2>🔄 類似題</h2><div class="empty"><div class="spinner"></div><div style="margin-top:12px">AI 出題中…（同觀念、換數字/情境）</div></div>`;
+  openModal('varModal');
+  try{
+    const prompt=`你是台灣高中學測${q.subject}老師。根據以下錯題的觀念，出一題「全新、考同一個知識點但換數字或情境」的${q.type||'題目'}，難度相近。主題/知識點：${q.chapter||'（未標）'}。原題參考：${(q.question||'').slice(0,600)}。只回 JSON（繁體中文）：{"question":"新題目（含選項）","ans":"正確答案","explain":"詳解"}`;
+    const r=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${settings.model}:generateContent`,{method:'POST',headers:{'Content-Type':'application/json','x-goog-api-key':settings.apiKey},body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{temperature:0.75,responseMimeType:'application/json'}})});
+    if(!r.ok){const t=await r.text();throw new Error('API '+r.status+' '+t.slice(0,100))}
+    const j=await r.json();const txt=j.candidates?.[0]?.content?.parts?.[0]?.text||'';
+    if(!txt)throw new Error('沒有回傳內容，請重試');
+    let o;try{o=JSON.parse(txt)}catch(e){o=JSON.parse(txt.slice(txt.indexOf('{'),txt.lastIndexOf('}')+1))}
+    varData={q,o,srcId:id,revealed:false,myWrite:''};
+    showVariation();
+  }catch(err){
+    $('varBody').innerHTML=`<div class="grabber"></div><h2>🔄 類似題</h2><div class="notice" style="margin-top:10px">❌ 出題失敗：${esc(err.message)}</div><div class="row" style="margin-top:12px"><button class="btn ghost" onclick="genVariation('${esc(id)}')">重試</button><button class="btn" onclick="closeModal('varModal')">關閉</button></div>`;
+  }
+}
+function varReveal(){const el=$('varWrite');if(el)varData.myWrite=el.value.trim();varData.revealed=true;showVariation()}
+function showVariation(){
+  const {q,o,revealed,myWrite}=varData;
+  $('varBody').innerHTML=`<div class="grabber"></div>
+    <h2>🔄 類似題（${esc(q.subject)}${q.chapter?'·'+esc(q.chapter):''}）</h2>
+    <div class="card" style="background:var(--bg)"><div style="line-height:1.7;white-space:pre-wrap">${esc(o.question||'')}</div></div>
+    ${revealed?`
+      ${myWrite?`<div class="card" style="background:var(--bg)"><div class="muted" style="font-size:12px">✍️ 你剛寫的</div><div style="white-space:pre-wrap;margin-top:3px">${esc(myWrite)}</div></div>`:''}
+      <div class="card" style="background:color-mix(in srgb,var(--primary) 12%,var(--bg))"><div class="muted" style="font-size:12px">正確答案</div><div class="correct" style="font-size:18px">${esc(o.ans||'')}</div>
+      ${o.explain?`<div class="hr"></div><b>💡 詳解</b><div style="margin-top:4px;line-height:1.7;white-space:pre-wrap">${esc(o.explain)}</div>`:''}
+      <div class="muted" style="margin-top:8px;font-size:11.5px">⚠️ AI 生成題目與解析僅供練習，請對照課本確認</div></div>
+      <div class="row"><button class="btn ghost" onclick="genVariation('${esc(varData.srcId)}')">🔄 再出一題</button><button class="btn" onclick="closeModal('varModal')">完成</button></div>`:`
+      <label class="fld" style="color:var(--primary2)">✍️ 先自己作答</label>
+      <textarea id="varWrite" placeholder="寫下你的答案再看解答">${esc(myWrite||'')}</textarea>
+      <div class="row" style="margin-top:8px"><button class="btn ghost" onclick="closeModal('varModal')">關閉</button><button class="btn" onclick="varReveal()">👀 顯示答案</button></div>`}
+  `;
+}
+
+/* ================= 複習（間隔重現 + 連對N次畢業）================= */
 const INTERVALS=[1,3,7,14,30];
 const GRAD_STREAK=3; // 連對幾次畢業（讓間隔重現真正走到 3、7 天，避免假熟練）
-let reviewQueue=[],reviewIdx=0,revealed=false,grading=false;
-function renderReview(){
-  reviewQueue=DATA.filter(q=>!q.mastered&&(q.nextReview||0)<=today());
-  reviewQueue.sort((a,b)=>(a.nextReview||0)-(b.nextReview||0));
-  reviewIdx=0;revealed=false;
+let reviewQueue=[],reviewIdx=0,revealed=false,grading=false,reviewScope=null,myWrite='';
+function reviewTopic(subject,topic){reviewScope={subject,topic:topic||''};go('review',true);}
+function reviewAll(){reviewScope='all';buildReviewQueue();}
+function reviewToday(){reviewScope=null;buildReviewQueue();}
+function buildReviewQueue(){
+  let list;
+  if(reviewScope==='all')list=shuffle(DATA.filter(q=>!q.mastered).slice());
+  else if(reviewScope&&typeof reviewScope==='object')list=shuffle(DATA.filter(q=>!q.mastered&&q.subject===reviewScope.subject&&(q.chapter||'')===reviewScope.topic).slice());
+  else{list=DATA.filter(q=>!q.mastered&&(q.nextReview||0)<=today());list.sort((a,b)=>(a.nextReview||0)-(b.nextReview||0));}
+  reviewQueue=list;reviewIdx=0;revealed=false;myWrite='';
   showReviewCard();
+}
+function scopeLabel(){if(reviewScope==='all')return '全部未精熟';if(reviewScope&&typeof reviewScope==='object')return reviewScope.subject+(reviewScope.topic?'·'+reviewScope.topic:'');return '今日到期'}
+function reviewHeader(){
+  return `<div class="card" style="padding:9px 12px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:10px">
+    ${streakBadge()}
+    <span style="flex:1"></span>
+    <span class="muted" style="font-size:12px">範圍：<b style="color:var(--txt)">${esc(scopeLabel())}</b></span>
+    ${reviewScope?`<button class="btn ghost sm" style="padding:4px 9px;font-size:11.5px" onclick="reviewToday()">↩ 今日到期</button>`:''}
+  </div>`;
 }
 function showReviewCard(){
   const area=$('reviewArea');
   if(!reviewQueue.length){
     const upcoming=DATA.filter(q=>!q.mastered).length;
-    area.innerHTML=`<div class="empty"><div class="big">🎉</div>
-      <div style="font-size:17px;font-weight:700;color:var(--txt)">今日複習完成！</div>
-      <div style="margin-top:6px">${upcoming?`還有 ${upcoming} 題在複習排程中，明天見`:'目前沒有待複習的錯題'}</div>
-      <button class="btn ghost" style="margin-top:16px" onclick="reviewAll()">🔁 複習全部未精熟</button></div>`;
+    area.innerHTML=reviewHeader()+`<div class="empty"><div class="big">🎉</div>
+      <div style="font-size:17px;font-weight:700;color:var(--txt)">${reviewScope?'這個範圍複習完成！':'今日複習完成！'}</div>
+      <div style="margin-top:6px">${upcoming?`還有 ${upcoming} 題未精熟`:'目前沒有待複習的錯題'}</div>
+      ${upcoming?`<button class="btn ghost" style="margin-top:16px" onclick="reviewAll()">🔁 複習全部未精熟</button>`:''}</div>`;
     return;
   }
-  if(reviewIdx>=reviewQueue.length){renderReview();return}
+  if(reviewIdx>=reviewQueue.length){buildReviewQueue();return}
   const q=reviewQueue[reviewIdx];
-  area.innerHTML=`
-    <div class="card" style="text-align:center;padding:10px"><span class="muted">第 ${reviewIdx+1} / ${reviewQueue.length} 題 · ${q.subject}${q.chapter?' · '+esc(q.chapter):''}</span></div>
-    <div class="card qcard s-${q.subject}" style="--sc:var(--s-${subjClass(q.subject)})">
-      ${q.image?`<img src="${q.image}" style="width:100%;border-radius:10px;margin-bottom:10px;background:#0008">`:''}
+  area.innerHTML=reviewHeader()+`
+    <div class="card" style="text-align:center;padding:10px"><span class="muted">第 ${reviewIdx+1} / ${reviewQueue.length} 題 · ${esc(q.subject)}${q.chapter?' · '+esc(q.chapter):''}</span></div>
+    <div class="card qcard s-${esc(q.subject)}" style="--sc:var(--s-${subjClass(q.subject)})">
+      ${imgURL(q)?`<img src="${esc(imgURL(q))}" style="width:100%;border-radius:10px;margin-bottom:10px;background:#0008">`:''}
       ${q.question?`<div style="line-height:1.7;white-space:pre-wrap">${esc(q.question)}</div>`:''}
     </div>
-    <div class="card" id="answerBox" style="background:var(--bg)">
-      <div class="${revealed?'':'answer-hidden'}">
-        <div class="row">
-          ${q.myAns?`<div style="text-align:center"><div class="muted" style="font-size:12px">我的答案</div><div class="wrong" style="font-size:18px">${esc(q.myAns)}</div></div>`:''}
-          ${q.ans?`<div style="text-align:center"><div class="muted" style="font-size:12px">正確答案</div><div class="correct" style="font-size:18px">${esc(q.ans)}</div></div>`:''}
-        </div>
-        ${q.explain?`<div class="hr"></div><b>💡 詳解</b><div style="margin-top:4px;line-height:1.7;white-space:pre-wrap">${esc(q.explain)}</div>`:''}
-      </div>
-    </div>
     ${revealed?`
-      <div class="notice" style="text-align:center;margin-bottom:10px">這題你會了嗎？答對連續 ${GRAD_STREAK} 次（分散在不同天）就畢業 🎓</div>
+    ${myWrite?`<div class="card" style="background:var(--bg)"><div class="muted" style="font-size:12px">✍️ 你剛寫的</div><div style="white-space:pre-wrap;margin-top:3px">${esc(myWrite)}</div></div>`:''}
+    <div class="card" style="background:var(--bg)">
       <div class="row">
-        <button class="btn bad" onclick="grade(false)">😵 還不會</button>
-        <button class="btn ok" onclick="grade(true)">😎 答對了</button>
-      </div>`:`
-      <button class="btn full" onclick="revealAns()">👀 顯示答案與詳解</button>`}
+        ${q.myAns?`<div style="text-align:center"><div class="muted" style="font-size:12px">當初我寫</div><div class="wrong" style="font-size:18px">${esc(q.myAns)}</div></div>`:''}
+        ${q.ans?`<div style="text-align:center"><div class="muted" style="font-size:12px">正確答案</div><div class="correct" style="font-size:18px">${esc(q.ans)}</div></div>`:''}
+      </div>
+      ${q.explain?`<div class="hr"></div><b>💡 詳解</b><div style="margin-top:4px;line-height:1.7;white-space:pre-wrap">${esc(q.explain)}</div><div class="muted" style="margin-top:8px;font-size:11.5px">⚠️ AI 解析僅供參考，請對照課本或問老師</div>`:''}
+    </div>
+    <div class="notice" style="text-align:center;margin-bottom:10px">對照一下，你答對了嗎？連對 ${GRAD_STREAK} 次（分散不同天）就畢業 🎓</div>
+    <div class="row">
+      <button class="btn bad" onclick="grade(false)">😵 還不會</button>
+      <button class="btn ok" onclick="grade(true)">😎 答對了</button>
+    </div>`:`
+    <label class="fld" style="color:var(--primary2)">✍️ 先自己作答（自己想過再看，記得最牢）</label>
+    <textarea id="reviewWrite" placeholder="把答案或關鍵步驟寫下來，再顯示解答對照">${esc(myWrite)}</textarea>
+    <button class="btn full" style="margin-top:8px" onclick="captureWrite();revealAns()">👀 我寫好了，顯示答案</button>`}
     <button class="btn ghost full" style="margin-top:8px" onclick="skipReview()">⏭️ 跳過</button>
   `;
 }
+function captureWrite(){const el=$('reviewWrite');if(el)myWrite=el.value.trim()}
 function revealAns(){revealed=true;showReviewCard()}
 function skipReview(){
+  const el=$('reviewWrite');if(el&&!revealed)myWrite='';
   if(reviewQueue.length<=1){toast('只剩這一題了 🙂');return}
   const q=reviewQueue.splice(reviewIdx,1)[0];reviewQueue.push(q); // 移到最後，不是原地重顯示
   if(reviewIdx>=reviewQueue.length-1)reviewIdx=0;
-  revealed=false;showReviewCard();
+  revealed=false;myWrite='';showReviewCard();
 }
 async function grade(correct){
   if(grading)return; grading=true; // 防連點重複計分
@@ -834,32 +1005,39 @@ async function grade(correct){
       q.streak=0;q.nextReview=daysFromNow(INTERVALS[0]);
     }
     try{await dbPut(q)}catch(err){toast('儲存失敗：'+((err&&err.message)||'請重試'))}
-    reviewIdx++;revealed=false;showReviewCard();
+    bumpStreak();
+    reviewIdx++;revealed=false;myWrite='';showReviewCard();
   }finally{grading=false}
 }
 function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
-function reviewAll(){
-  reviewQueue=shuffle(DATA.filter(q=>!q.mastered));
-  reviewIdx=0;revealed=false;showReviewCard();
-}
 
 /* ================= 統計 ================= */
 function renderStats(){
+  renderCountdown('statCountdown');
   const total=DATA.length, mastered=DATA.filter(q=>q.mastered).length;
   const due=DATA.filter(q=>!q.mastered&&(q.nextReview||0)<=today()).length;
   $('statTop').innerHTML=`
     <div class="stat"><div class="n">${total}</div><div class="l">總錯題</div></div>
     <div class="stat"><div class="n" style="color:var(--warn)">${due}</div><div class="l">待複習</div></div>
     <div class="stat"><div class="n" style="color:var(--ok)">${mastered}</div><div class="l">已精熟</div></div>`;
+  // 弱點主題（依主題聚合，未精熟數排序）— 主分類軸
+  const byT={};DATA.forEach(q=>{const t=(q.subject)+'　／　'+(q.chapter||'未分類');(byT[t]=byT[t]||{n:0,due:0,subj:q.subject,topic:q.chapter||''}).n++;if(!q.mastered)byT[t].due++;});
+  const te=Object.entries(byT).sort((a,b)=>b[1].n-a[1].n).slice(0,12);
+  const maxT=Math.max(1,...te.map(e=>e[1].n));
+  $('statTopic').innerHTML=te.length?te.map(([k,v])=>`
+    <div class="bar-row" style="cursor:pointer" onclick="reviewTopic('${esc(v.subj)}','${esc(v.topic)}')" title="複習這個主題">
+      <div class="name" style="width:96px;font-size:12px">${esc(k.replace('　／　','·'))}</div>
+      <div class="bar-wrap"><div class="bar-fill" style="width:${Math.round(v.n/maxT*100)}%;background:var(--s-${subjClass(v.subj)})"></div></div>
+      <div class="val">${v.due?v.due+'待':v.n}</div></div>`).join(''):'<div class="muted">尚無資料</div>';
   // 各科
   const bySub={};SUBJECTS.forEach(s=>bySub[s]=0);DATA.forEach(q=>bySub[q.subject]=(bySub[q.subject]||0)+1);
   const maxS=Math.max(1,...Object.values(bySub));
   $('statSubject').innerHTML=SUBJECTS.filter(s=>bySub[s]>0).map(s=>bar(s,bySub[s],maxS,`var(--s-${subjClass(s)})`)).join('')||'<div class="muted">尚無資料</div>';
-  // 錯因
+  // 錯因（次要）
   const byC={};DATA.forEach(q=>{if(q.cause)byC[q.cause]=(byC[q.cause]||0)+1});
   const maxC=Math.max(1,...Object.values(byC));
   const ce=Object.entries(byC).sort((a,b)=>b[1]-a[1]);
-  $('statCause').innerHTML=ce.length?ce.map(([c,n])=>bar(c,n,maxC,'var(--accent)')).join(''):'<div class="muted">尚無資料</div>';
+  $('statCause').innerHTML=ce.length?ce.map(([c,n])=>bar(c,n,maxC,'var(--accent)')).join(''):'<div class="muted">（尚未標記錯因）</div>';
   // 進度
   const pct=total?Math.round(mastered/total*100):0;
   $('statProgress').innerHTML=`
@@ -914,10 +1092,11 @@ window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredPro
 window.addEventListener('appinstalled',()=>{deferredPrompt=null;toast('已安裝到桌面 🎉');updateInstallUI()});
 
 /* ================= 設定 ================= */
-function loadSettingsUI(){$('setApiKey').value=settings.apiKey||'';$('setModel').value=settings.model||'gemini-2.5-flash';updateInstallUI()}
+function loadSettingsUI(){$('setApiKey').value=settings.apiKey||'';$('setModel').value=settings.model||'gemini-2.5-flash';$('setGsatDate').value=settings.gsatDate||'';updateInstallUI()}
 function saveSettings(){
   settings.apiKey=$('setApiKey').value.trim();
   settings.model=$('setModel').value;
+  settings.gsatDate=$('setGsatDate').value||'';
   localStorage.setItem(SETTINGS_KEY,JSON.stringify(settings));
   toast('設定已儲存 💾');
 }
@@ -932,11 +1111,48 @@ async function testKey(){
   }catch(e){toast('❌ '+e.message)}
 }
 
+/* ================= 列印錯題本 ================= */
+function printBook(hideAns){
+  if(!DATA.length){toast('還沒有錯題可列印');return}
+  // 依科目→主題分組
+  const groups={};
+  const sorted=DATA.slice().sort((a,b)=>{const s=SUBJECTS.indexOf(a.subject)-SUBJECTS.indexOf(b.subject);return s||((a.chapter||'').localeCompare(b.chapter||'','zh'))});
+  sorted.forEach(q=>{const k=q.subject+'　／　'+(q.chapter||'未分類');(groups[k]=groups[k]||[]).push(q)});
+  let html=`<h1>📕 我的錯題本${hideAns?'（考卷版）':''}</h1><div class="pmeta">共 ${DATA.length} 題 · 列印日 ${new Date().toLocaleDateString()}${hideAns?' · 答案已隱藏，寫完再對照 App':''}</div>`;
+  let n=0;
+  Object.keys(groups).forEach(k=>{
+    html+=`<div class="ptopic">${esc(k.replace('　／　','　·　'))}（${groups[k].length}）</div>`;
+    groups[k].forEach(q=>{
+      n++;
+      html+=`<div class="pq"><div class="qn">第 ${n} 題　${esc(q.type||'')}　難度${esc(q.diff||'中')}</div>`;
+      if(q.question)html+=`<div class="qt">${esc(q.question)}</div>`;
+      const u=imgURL(q);if(u)html+=`<img src="${esc(u)}">`;
+      if(!hideAns){
+        html+=`<div class="pans">${q.myAns?`我當初寫：${esc(q.myAns)}　｜　`:''}<b>正解：${esc(q.ans||'—')}</b></div>`;
+        if(q.explain)html+=`<div class="pexp">💡 ${esc(q.explain)}</div>`;
+      }else{
+        html+=`<div class="pans">答：＿＿＿＿＿＿＿＿＿＿</div>`;
+      }
+      html+=`</div>`;
+    });
+  });
+  $('printArea').innerHTML=html;
+  setTimeout(()=>window.print(),120);
+}
+
 /* ================= 匯出/匯入 ================= */
-function exportData(){
-  const blob=new Blob([JSON.stringify({version:1,exportedAt:Date.now(),questions:DATA},null,0)],{type:'application/json'});
+async function exportData(){
+  toast('匯出中…');
+  const out=[];
+  for(const q of DATA){
+    const c=Object.assign({},q);
+    if(c.image instanceof Blob)c.image=await blobToDataURL(c.image); // Blob→base64 才能進 JSON
+    out.push(c);
+  }
+  const blob=new Blob([JSON.stringify({version:1,exportedAt:Date.now(),questions:out},null,0)],{type:'application/json'});
   const a=document.createElement('a');a.href=URL.createObjectURL(blob);
   a.download='錯題備份_'+new Date().toISOString().slice(0,10)+'.json';a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href),1000);
   toast('已匯出 '+DATA.length+' 題');
 }
 function importData(file){
@@ -965,7 +1181,7 @@ function importData(file){
             explain:typeof raw.explain==='string'?raw.explain:'',
             cause:typeof raw.cause==='string'?raw.cause:'',
             source:typeof raw.source==='string'?raw.source:'',
-            image:safeImg(raw.image)||null,
+            image:(safeImg(raw.image)?dataURLtoBlob(raw.image):null),
             hasFigure:!!raw.hasFigure,
             streak:Number(raw.streak)||0,
             reviewCount:Number(raw.reviewCount)||0,
@@ -992,6 +1208,7 @@ async function wipeAll(){
 /* ================= 啟動 ================= */
 async function init(){
   try{settings=Object.assign(settings,JSON.parse(localStorage.getItem(SETTINGS_KEY)||'{}'))}catch(e){}
+  loadStreak();
   // 申請持久化儲存，降低錯題被系統清除的風險
   try{if(navigator.storage&&navigator.storage.persist)await navigator.storage.persist()}catch(e){}
   try{
