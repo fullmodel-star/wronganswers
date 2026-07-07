@@ -184,6 +184,8 @@ body.lite *{animation:none!important;transition:none!important}
 .gstep .gt b{color:var(--txt)}
 .gstep code{background:var(--card2);color:var(--primary2);padding:1px 6px;border-radius:5px;font-size:12.5px;word-break:break-all}
 .gtip{margin-top:10px;font-size:12.5px;color:var(--dim);line-height:1.6;background:var(--card2);border-radius:9px;padding:9px 11px}
+.tgroup{margin-bottom:14px}
+.tgu{font-size:12.5px;font-weight:800;color:var(--primary2);margin-bottom:6px}
 
 /* ===== 安裝橫幅 ===== */
 .install-banner{display:none;position:fixed;left:12px;right:12px;bottom:calc(84px + env(safe-area-inset-bottom,0));z-index:47;background:linear-gradient(135deg,#4f46e5,#7c3aed);color:#fff;border-radius:14px;padding:11px 12px;box-shadow:0 8px 24px rgba(79,70,229,.42);align-items:center;gap:10px}
@@ -304,6 +306,11 @@ body.lite *{animation:none!important;transition:none!important}
     <h3 style="margin:0 0 4px;font-size:16px">🎯 弱點主題（錯最多）</h3>
     <p class="muted" style="margin:0 0 12px;font-size:12px">點主題即可只複習這個主題的錯題</p>
     <div id="statTopic"></div>
+  </div>
+  <div class="card">
+    <h3 style="margin:0 0 4px;font-size:16px">📚 課綱覆蓋</h3>
+    <p class="muted" style="margin:0 0 12px;font-size:12px">你的錯題涵蓋了各科課綱的哪些知識點（依 108 課綱）</p>
+    <div id="statCoverage"></div>
   </div>
   <div class="card">
     <h3 style="margin:0 0 12px;font-size:16px">📊 各科錯題分布</h3>
@@ -503,9 +510,12 @@ body.lite *{animation:none!important;transition:none!important}
       <label class="fld">科目 *</label>
       <div class="chips" id="fSubject"></div>
       <label class="fld" style="color:var(--primary2);font-weight:800">🎯 主題 / 知識點（分類主軸，建議填）</label>
-      <input id="fChapter" list="topicList" placeholder="例：三角函數、氧化還原、文言文虛詞…">
+      <div class="row" style="gap:8px;align-items:stretch">
+        <input id="fChapter" list="topicList" placeholder="例：三角函數、氧化還原、文言文虛詞…" style="flex:1">
+        <button type="button" class="btn ghost sm" style="flex:none;width:92px;min-width:0" onclick="openTopicPicker()">📚 課綱</button>
+      </div>
       <datalist id="topicList"></datalist>
-      <div class="muted" style="font-size:11.5px;margin-top:4px">這題考的觀念是什麼？之後就靠它分類、篩選、依主題複習。輸入時會提示你已建立的主題。</div>
+      <div class="muted" style="font-size:11.5px;margin-top:4px">這題考的觀念是什麼？可按「📚 課綱」從高中課綱挑，或直接輸入（會提示課綱與你已建立的主題）。</div>
       <label class="fld">題目內容</label>
       <textarea id="fQuestion" placeholder="題目文字（AI 辨識後會自動填入，可修改）。數學可用 $...$ 寫式子，如 $x^2+\frac{1}{2}$"></textarea>
       <div class="row">
@@ -572,6 +582,11 @@ body.lite *{animation:none!important;transition:none!important}
   </div>
 </div>
 
+<!-- ============ 課綱主題挑選 Modal ============ -->
+<div class="modal-bg" id="topicModal">
+  <div class="modal" id="topicBody"></div>
+</div>
+
 <!-- 列印用容器（螢幕隱藏，僅列印時顯示） -->
 <div id="printArea"></div>
 
@@ -611,6 +626,118 @@ function dbClear(){return new Promise((res,rej)=>{const t=tx('readwrite');t.obje
 /* ================= 常數 ================= */
 let SUBJECTS=['國文','英文','數學','自然','歷史','地理','公民','其他']; // 可於設定自訂
 const CAUSES=['觀念不熟','計算錯誤','看錯題目','粗心','時間不夠','完全不會','陷阱題','記混/混淆','文意理解錯','關鍵字漏看','年代/名詞背錯','字音字形'];
+/* ===== 高中 108 課綱知識庫（單元→知識點；學測必修範圍為主）===== */
+const CURRICULUM={
+ '國文':[
+  {u:'字詞與成語',t:['字音','字形','字義','詞語辨析','成語運用']},
+  {u:'文法與修辭',t:['詞性與句法','修辭格','標點符號','語法病句']},
+  {u:'文言文閱讀',t:['虛詞','實詞','句讀斷句','文言翻譯','文意理解']},
+  {u:'白話文閱讀',t:['現代散文','現代小說','現代詩','主旨與寓意','篇章結構']},
+  {u:'古典韻文',t:['詩經楚辭','唐詩','宋詞','元曲','樂府古詩']},
+  {u:'文化經典',t:['論語孟子','大學中庸','老莊','史記','經典選讀']},
+  {u:'國學與應用',t:['國學常識','應用文','書信對聯','圖表判讀']},
+  {u:'寫作',t:['知性寫作','情意寫作','引導式作文']}
+ ],
+ '英文':[
+  {u:'字彙與片語',t:['字彙','片語','慣用語','構詞']},
+  {u:'文法',t:['時態','被動語態','關係子句','假設語氣','分詞構句','動名詞與不定詞','連接詞','介系詞','比較級','名詞子句']},
+  {u:'題型',t:['綜合測驗(克漏字)','文意選填','篇章結構','閱讀測驗']},
+  {u:'寫作與翻譯',t:['中譯英','看圖/主題作文','段落寫作']},
+  {u:'聽力',t:['看圖辨義','對話理解','短文聽解']}
+ ],
+ '數學':[
+  {u:'數與式',t:['實數與絕對值','指數與根式','對數','數的估算']},
+  {u:'多項式',t:['多項式運算','因式定理','方程式','不等式','餘式定理']},
+  {u:'指數對數函數',t:['指數函數','對數函數','指對數應用']},
+  {u:'三角',t:['銳角三角比','廣義角','正弦餘弦定理','和差角公式','三角函數圖形']},
+  {u:'直線與圓',t:['斜率與直線方程','圓方程式','點到直線距離']},
+  {u:'數列與級數',t:['等差數列','等比數列','級數求和','數學歸納法']},
+  {u:'排列組合與機率',t:['排列','組合','機率','期望值','二項式定理']},
+  {u:'統計',t:['一維數據(平均/標準差)','二維數據(相關/迴歸)','機率分布']},
+  {u:'向量',t:['平面向量','向量內積','空間向量','空間中平面與直線']},
+  {u:'矩陣(數A)',t:['矩陣運算','線性變換','聯立方程組']},
+  {u:'二次曲線(數A)',t:['拋物線','橢圓','雙曲線']},
+  {u:'複數(數A)',t:['複數運算','複數平面','棣美弗定理']},
+  {u:'微積分初步(數A)',t:['極限','微分','積分','極值應用']}
+ ],
+ '物理':[
+  {u:'運動學',t:['等速運動','等加速度運動','自由落體','平拋運動','圓周運動']},
+  {u:'力與運動',t:['牛頓運動定律','摩擦力','力的平衡','向心力']},
+  {u:'功與能量',t:['功','動能與位能','能量守恆','功率']},
+  {u:'動量',t:['動量守恆','碰撞','衝量']},
+  {u:'重力場',t:['萬有引力','克卜勒定律','衛星運動']},
+  {u:'熱學',t:['溫度與熱量','熱膨脹','理想氣體','熱力學']},
+  {u:'波動與聲音',t:['波的性質','疊加與干涉','駐波','聲音與都卜勒效應']},
+  {u:'光學',t:['反射與折射','面鏡與透鏡','干涉與繞射','光譜']},
+  {u:'電學',t:['庫侖定律','電場與電位','電流與電阻','電路分析']},
+  {u:'電磁學',t:['磁場與磁力','電流磁效應','電磁感應','交流電']},
+  {u:'近代物理',t:['光電效應','原子模型','量子概念','核物理與放射性']}
+ ],
+ '化學':[
+  {u:'物質與原子',t:['物質分類','原子結構','同位素','電子組態']},
+  {u:'週期表',t:['週期表結構','週期性','元素性質']},
+  {u:'化學鍵',t:['離子鍵','共價鍵','金屬鍵','分子形狀與極性']},
+  {u:'化學計量',t:['莫耳概念','化學反應式平衡','濃度計算','限量試劑']},
+  {u:'氣體與溶液',t:['氣體定律','溶解度','溶液濃度','膠體']},
+  {u:'反應速率與平衡',t:['反應速率','化學平衡','勒沙特列原理','平衡常數']},
+  {u:'酸鹼',t:['酸鹼定義','pH值','中和滴定','緩衝溶液','鹽類水解']},
+  {u:'氧化還原與電化學',t:['氧化數','氧化還原反應','電池','電解']},
+  {u:'有機化學',t:['官能基','烴類','醇醛酮酸酯','聚合物']},
+  {u:'化學與生活',t:['能源','環境化學','材料']}
+ ],
+ '生物':[
+  {u:'細胞',t:['細胞構造','細胞膜與物質運輸','細胞分裂']},
+  {u:'代謝',t:['酵素','細胞呼吸','光合作用']},
+  {u:'遺傳',t:['孟德爾遺傳','染色體與性別','DNA複製','基因表現','突變']},
+  {u:'生物技術',t:['基因工程','生物技術應用']},
+  {u:'演化與多樣性',t:['天擇與演化','物種與分類','生物多樣性']},
+  {u:'植物生理',t:['植物組織','運輸作用','植物生殖','植物感應']},
+  {u:'動物生理',t:['消化','循環','呼吸','排泄','神經','內分泌','免疫','恆定性']},
+  {u:'生殖與發生',t:['生殖','胚胎發生']},
+  {u:'生態',t:['族群與群集','生態系','能量流與物質循環','環境保育']}
+ ],
+ '地球科學':[
+  {u:'地質',t:['礦物與岩石','板塊運動','地震','火山','地質作用']},
+  {u:'地球歷史',t:['地層與化石','地質年代']},
+  {u:'大氣',t:['大氣結構','天氣系統','氣象觀測','氣候變遷']},
+  {u:'海洋',t:['海水性質','洋流','潮汐','波浪']},
+  {u:'天文',t:['太陽系','恆星與演化','宇宙','觀測天文']},
+  {u:'地球運動',t:['晝夜與四季','日月食','曆法']},
+  {u:'環境與永續',t:['自然資源','天然災害','永續發展']}
+ ],
+ '歷史':[
+  {u:'臺灣史',t:['原住民與早期臺灣','荷西與明鄭','清領時期','日治時期','戰後臺灣']},
+  {u:'中國史/東亞史',t:['先秦','秦漢','魏晉南北朝','隋唐','宋元','明清','近代中國']},
+  {u:'世界史',t:['上古文明','中古歐洲','近代早期','啟蒙與革命','帝國主義與兩次大戰','冷戰與當代']},
+  {u:'主題史',t:['政治與制度','經濟與貿易','文化與宗教','族群與人群移動','國際關係']}
+ ],
+ '地理':[
+  {u:'地理技能',t:['地圖與經緯度','地理資訊系統GIS','遙測判讀','統計圖表']},
+  {u:'地形',t:['內營力','外營力(河海風冰)','喀斯特地形','臺灣地形']},
+  {u:'氣候與水文',t:['氣候要素','氣候類型','水文與水資源']},
+  {u:'土壤與生態',t:['土壤','自然景觀帶']},
+  {u:'人口與聚落',t:['人口成長與分布','人口遷移','都市化與聚落']},
+  {u:'產業活動',t:['農業','工業','服務業與觀光','交通運輸']},
+  {u:'全球化與議題',t:['全球化','區域發展','環境議題','永續發展']},
+  {u:'區域地理',t:['臺灣地理','中國地理','世界區域地理']}
+ ],
+ '公民':[
+  {u:'社會與文化',t:['自我與社會化','多元文化','性別','社會階層與團體']},
+  {u:'政治',t:['民主與人權','憲法與人權保障','政府體制','政黨與選舉','民意與參與']},
+  {u:'法律',t:['法律基本概念','民法','刑法','行政法','權利救濟']},
+  {u:'經濟',t:['市場供需與價格','生產與成本','國民所得','政府與經濟','貨幣與金融','國際貿易']},
+  {u:'全球關聯',t:['全球化','國際組織','永續發展']}
+ ]
+};
+const SUBJ_MERGE={'自然':['物理','化學','生物','地球科學'],'社會':['歷史','地理','公民']};
+function curriculumFor(s){
+  if(CURRICULUM[s])return CURRICULUM[s];
+  if(SUBJ_MERGE[s]){const out=[];SUBJ_MERGE[s].forEach(sub=>(CURRICULUM[sub]||[]).forEach(g=>out.push({u:sub+'·'+g.u,t:g.t})));return out;}
+  return [];
+}
+function curriculumLeaves(s){const gs=curriculumFor(s);const out=[];gs.forEach(g=>g.t.forEach(t=>out.push(t)));return out;}
+// 給 AI 的精簡課綱單元提示（全科單元名）
+const UNIT_HINT=Object.entries(CURRICULUM).map(([s,gs])=>s+':'+gs.map(g=>g.u).join('、')).join('；');
 const SETTINGS_KEY='cuoti_settings';
 let settings={apiKey:'',model:'gemini-2.5-flash',gsatDate:'',lite:false,subjects:null,dailyLimit:30,timer:false};
 
@@ -727,12 +854,40 @@ function buildChips(el,items,current,cb,optional){
 }
 function selectedChip(el){const c=el.querySelector('.chip.on');return c?c.textContent:''}
 function allTopics(){return [...new Set(DATA.map(q=>q.chapter).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'zh'))}
-function refreshTopicList(){const dl=$('topicList');if(dl)dl.innerHTML=allTopics().map(t=>`<option value="${esc(t)}">`).join('')}
+function refreshTopicList(){
+  const dl=$('topicList');if(!dl)return;
+  const subj=selectedChip($('fSubject'));
+  const list=[...new Set([...curriculumLeaves(subj),...allTopics()])];
+  dl.innerHTML=list.map(t=>`<option value="${esc(t)}">`).join('');
+}
+function openTopicPicker(){
+  const subj=selectedChip($('fSubject'));
+  const groups=curriculumFor(subj);
+  if(!groups.length){toast('「'+(subj||'此科目')+'」暫無課綱清單，請直接輸入主題');$('fChapter').focus();return}
+  const cur=$('fChapter').value.trim();
+  $('topicBody').innerHTML=`<div class="grabber"></div>
+    <h2>📚 ${esc(subj)} · 課綱主題</h2>
+    <p class="muted" style="margin:2px 0 12px">點一個知識點當作分類主題（依 108 課綱）</p>
+    <input id="topicSearch" placeholder="🔍 篩選知識點…" oninput="filterTopicPicker()" style="margin-bottom:12px">
+    <div id="topicTree">${groups.map(g=>`
+      <div class="tgroup"><div class="tgu">${esc(g.u)}</div><div class="chips">${g.t.map(t=>`<div class="chip${t===cur?' on':''}" onclick="pickTopic('${esc(t).replace(/'/g,"\\'")}')">${esc(t)}</div>`).join('')}</div></div>`).join('')}</div>
+    <button class="btn ghost full" style="margin-top:14px" onclick="closeModal('topicModal')">關閉</button>`;
+  openModal('topicModal');
+}
+function filterTopicPicker(){
+  const k=($('topicSearch').value||'').trim().toLowerCase();
+  $('topicTree').querySelectorAll('.tgroup').forEach(g=>{
+    let any=false;
+    g.querySelectorAll('.chip').forEach(c=>{const hit=!k||c.textContent.toLowerCase().includes(k);c.style.display=hit?'':'none';if(hit)any=true;});
+    g.style.display=any?'':'none';
+  });
+}
+function pickTopic(t){$('fChapter').value=t;closeModal('topicModal');toast('主題：'+t)}
 
 function openAdd(){
   editingId=null;pendingImg=null;pendingFigure=false;
   $('addTitle').textContent='新增錯題';
-  buildChips($('fSubject'),SUBJECTS,(localStorage.getItem('cuoti_lastsubj')||'數學'));
+  buildChips($('fSubject'),SUBJECTS,(localStorage.getItem('cuoti_lastsubj')||'數學'),refreshTopicList);
   buildChips($('fCause'),CAUSES,'',null,true);
   ['fChapter','fType','fQuestion','fMyAns','fAns','fExplain','fSource','fPassage'].forEach(i=>$(i).value='');
   $('fDiff').value='中';
@@ -745,7 +900,7 @@ function openEdit(id){
   editingId=id;pendingImg=q.image||null;pendingFigure=!!q.hasFigure;
   pendingMime=(pendingImg instanceof Blob)?(pendingImg.type||'image/jpeg'):((typeof pendingImg==='string'&&pendingImg.indexOf('data:')===0)?(pendingImg.slice(5,pendingImg.indexOf(',')).split(';')[0]||'image/jpeg'):'image/jpeg');
   $('addTitle').textContent='編輯錯題';
-  buildChips($('fSubject'),SUBJECTS,q.subject);
+  buildChips($('fSubject'),SUBJECTS,q.subject,refreshTopicList);
   buildChips($('fCause'),CAUSES,q.cause,null,true);
   refreshTopicList();
   $('fChapter').value=q.chapter||'';$('fType').value=q.type||'';$('fDiff').value=q.diff||'中';
@@ -811,7 +966,7 @@ async function recognize(){
     const prompt=`你是台灣高中學測的解題老師。這張圖片是一題學生做錯的考題，可能含圖形（幾何圖、函數圖、圖表、電路、化學結構、地圖等）。請辨識並以繁體中文回傳 JSON（只回 JSON，不要多餘文字），欄位：
 {
  "subject": 科目，只能是「國文/英文/數學/自然/歷史/地理/公民/其他」其中之一,
- "chapter": 主題／知識點，越精準越好（例：三角函數、氧化還原、文言文虛詞、戰後台灣、板塊運動、憲政體制）,
+ "chapter": 主題／知識點，請盡量使用「108 課綱標準單元／知識點名稱」（可參考下方課綱單元），命名精準一致,
  "type": 題型（例：單選題、多選題、計算題、閱讀測驗、填充）,
  "diff": 難度「易/中/難」,
  "question": 完整題目文字（含選項）；數學/理化的數學式請用 LaTeX 並包在 $...$ 內（例：$x^2+\\frac{1}{2}$、$H_2O$、$\\sqrt{3}$）；若題目含圖形，請在文字中清楚描述圖形內容，讓沒看到圖也能理解,
@@ -819,7 +974,8 @@ async function recognize(){
  "ans": 正確答案（若題目有標示或你能判斷；數學式同樣用 $...$）,
  "explain": 詳細解析，說明正確答案的理由與觀念；數學式用 $...$；若有圖形，說明如何判讀該圖,
  "tags": 相關關鍵字（字串，逗號分隔）
-}${chapterHint}`;
+}
+【108課綱單元參考（chapter 請對應到最貼近的知識點）】${UNIT_HINT}${chapterHint}`;
     const url=`https://generativelanguage.googleapis.com/v1beta/models/${settings.model}:generateContent`;
     const body={
       contents:[{parts:[{text:prompt},{inline_data:{mime_type:mime,data:base64}}]}],
@@ -1276,6 +1432,19 @@ function renderStats(){
       <div class="name" style="width:96px;font-size:12px">${esc(k.replace('　／　','·'))}</div>
       <div class="bar-wrap"><div class="bar-fill" style="width:${Math.round(v.n/maxT*100)}%;background:var(--s-${subjClass(v.subj)})"></div></div>
       <div class="val">${v.due?v.due+'待':v.n}</div></div>`).join(''):'<div class="muted">尚無資料</div>';
+  // 課綱覆蓋：各科「錯題涵蓋的知識點數 / 課綱知識點總數」
+  const subjSet=[...new Set(DATA.map(q=>q.subject))].filter(s=>curriculumFor(s).length);
+  const covHtml=subjSet.map(s=>{
+    const leaves=curriculumLeaves(s);
+    const errTopics=new Set(DATA.filter(q=>q.subject===s&&q.chapter).map(q=>q.chapter));
+    const hit=leaves.filter(l=>errTopics.has(l)).length;
+    const offList=[...errTopics].filter(t=>!leaves.includes(t)).length; // 非課綱標準命名的主題數
+    const pct=Math.round(hit/Math.max(1,leaves.length)*100);
+    return `<div class="bar-row"><div class="name" style="width:60px">${esc(s)}</div>
+      <div class="bar-wrap"><div class="bar-fill" style="width:${pct}%;background:var(--s-${subjClass(s)})"></div></div>
+      <div class="val" style="width:auto;font-size:11px">${hit}/${leaves.length}${offList?' <span style="color:var(--warn)" title="非課綱標準命名">+'+offList+'自訂</span>':''}</div></div>`;
+  }).join('');
+  $('statCoverage').innerHTML=covHtml||'<div class="muted">加入錯題後，這裡顯示涵蓋的課綱知識點</div>';
   // 各科
   const bySub={};SUBJECTS.forEach(s=>bySub[s]=0);DATA.forEach(q=>bySub[q.subject]=(bySub[q.subject]||0)+1);
   const maxS=Math.max(1,...Object.values(bySub));
@@ -1536,7 +1705,7 @@ async function init(){
 }
 
 /* ================= 版本更新機制 ================= */
-const APP_VERSION='9（2026-07-07）';
+const APP_VERSION='10（2026-07-07 課綱知識庫）';
 let swReg=null, swRefreshing=false;
 function showUpdateBanner(){$('updateBanner').classList.add('show')}
 function registerSW(){
