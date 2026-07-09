@@ -134,7 +134,7 @@ label.fld{display:block;font-size:12px;color:var(--dim);margin:12px 0 5px;font-w
 .qcard.expand .qtext{max-height:none}
 .qcard img.thumb{width:100%;border-radius:10px;margin-top:8px;max-height:220px;object-fit:contain;background:#0008}
 .grad{-webkit-mask:linear-gradient(180deg,#000 60%,transparent)}
-.mastered-badge{color:var(--ok);font-size:11px;font-weight:700}
+.mastered-badge{color:#14b8a6;font-size:11px;font-weight:700}
 
 /* 統計 */
 .stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
@@ -261,6 +261,9 @@ body.lite *{animation:none!important;transition:none!important}
   #listArea.group .gcards{display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:start}
   #listArea.group .gcards .card{margin-bottom:0}
   #reviewArea{max-width:700px;margin:0 auto}
+  #page-stats{display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:start}
+  #page-stats>#statCountdown,#page-stats>#statCheer,#page-stats>.stat-grid{grid-column:1 / -1}
+  #page-stats .card{margin-bottom:0}
   .install-banner{left:auto;right:26px;bottom:26px;max-width:360px}
 }
 @media (min-width:1280px){
@@ -302,6 +305,7 @@ body.lite *{animation:none!important;transition:none!important}
   <div id="listCountdown"></div>
   <div id="listMotivate"></div>
   <div class="card" style="padding:12px" id="filterCard">
+    <div class="chips" id="presetBar" style="margin-bottom:8px"></div>
     <div class="chips" id="subjFilter"></div>
     <div class="row" style="gap:8px;margin-top:10px">
       <input id="listSearch" placeholder="🔍 搜尋這些題…" oninput="listSearchInput()" style="flex:1">
@@ -331,6 +335,15 @@ body.lite *{animation:none!important;transition:none!important}
         <select id="filterCause2" onchange="renderList()"><option value="">全部錯因</option></select>
         <button class="btn ghost sm" id="starToggle" onclick="toggleStarFilter()" style="max-width:96px">☆ 重點</button>
       </div>
+      <div class="row" style="gap:8px;margin-top:8px">
+        <select id="filterUnit" onchange="renderList()"><option value="">全部單元</option></select>
+        <select id="filterType" onchange="renderList()"><option value="">全部題型</option></select>
+        <select id="filterSource" onchange="renderList()"><option value="">全部來源</option></select>
+      </div>
+      <label class="fld" style="margin-top:10px">分組依據</label>
+      <select id="groupBySel" onchange="setGroupBy(this.value)">
+        <option value="chapter">主題／知識點</option><option value="unit">課綱單元</option><option value="source">來源</option><option value="type">題型</option><option value="diff">難度</option>
+      </select>
     </div>
     <div class="row" style="gap:8px;margin-top:10px">
       <div class="seg" style="flex:1" id="viewSeg">
@@ -382,6 +395,11 @@ body.lite *{animation:none!important;transition:none!important}
   <div class="card">
     <h3 style="margin:0 0 12px;font-size:16px">🔥 複習進度</h3>
     <div id="statProgress"></div>
+  </div>
+  <div class="card">
+    <h3 style="margin:0 0 4px;font-size:16px">📈 近期正確率</h3>
+    <p class="muted" style="margin:0 0 10px;font-size:12px">最近 14 天每天複習的答對率</p>
+    <div id="statTrend"></div>
   </div>
   <details class="guide" style="background:var(--card)">
     <summary>📉 錯因分析（次要參考）</summary>
@@ -602,14 +620,14 @@ body.lite *{animation:none!important;transition:none!important}
         <summary>＋ 更多欄位（選填：題型 · 難度 · 文章 · 錯因 · 來源）</summary>
         <div class="gbody">
           <div class="row" style="margin-top:6px">
-            <div><label class="fld">題型</label><input id="fType" placeholder="單選/計算/閱讀…"></div>
+            <div><label class="fld">題型</label><input id="fType" list="typeList" placeholder="單選/計算/閱讀…"><datalist id="typeList"><option value="單選題"><option value="多選題"><option value="計算題"><option value="填充題"><option value="閱讀測驗"><option value="題組"><option value="非選/簡答"><option value="證明題"></datalist></div>
             <div><label class="fld">難度</label>
               <select id="fDiff"><option value="易">易</option><option value="中" selected>中</option><option value="難">難</option></select>
             </div>
           </div>
           <label class="fld">📄 共用文章 / 題幹（閱讀測驗用，可留空）</label>
           <textarea id="fPassage" placeholder="長篇閱讀的文章貼這裡；之後在題目上可用「從同篇再加一題」共用它"></textarea>
-          <label class="fld">錯因（選填，做完檢討再補即可）</label>
+          <label class="fld">錯因（選填，可多選）</label>
           <div class="chips" id="fCause"></div>
           <label class="fld">來源 / 標籤</label>
           <input id="fSource" placeholder="例：112學測、翰林講義p.45、複習卷3">
@@ -659,6 +677,11 @@ body.lite *{animation:none!important;transition:none!important}
 <!-- ============ 課綱主題挑選 Modal ============ -->
 <div class="modal-bg" id="topicModal">
   <div class="modal" id="topicBody"></div>
+</div>
+
+<!-- ============ 限時模擬考 Modal ============ -->
+<div class="modal-bg" id="mockModal">
+  <div class="modal" id="mockBody"></div>
 </div>
 
 <!-- 列印用容器（螢幕隱藏，僅列印時顯示） -->
@@ -926,20 +949,21 @@ function renderTopicChips(){
 function addTopicChip(t){t=(t||'').trim();if(!t)return;if(pendingTopics.indexOf(t)<0)pendingTopics.push(t);renderTopicChips();refreshTopicList();}
 function removeTopicChip(i){pendingTopics.splice(i,1);renderTopicChips();}
 
-function buildChips(el,items,current,cb,optional){
+function buildChips(el,items,current,cb,optional,multi){
+  const cur=multi?(Array.isArray(current)?current:[]):current;
   el.innerHTML='';
   items.forEach(it=>{
     const c=document.createElement('div');
-    c.className='chip'+(it===current?' on':'');
+    c.className='chip'+((multi?cur.indexOf(it)>=0:it===current)?' on':'');
     c.textContent=it;c.onclick=()=>{
-      const wasOn=c.classList.contains('on');
-      el.querySelectorAll('.chip').forEach(x=>x.classList.remove('on'));
-      if(!(optional&&wasOn)){c.classList.add('on');cb&&cb(it)} // 選填時再點一次可取消
+      if(multi){c.classList.toggle('on');cb&&cb();}
+      else{const wasOn=c.classList.contains('on');el.querySelectorAll('.chip').forEach(x=>x.classList.remove('on'));if(!(optional&&wasOn)){c.classList.add('on');cb&&cb(it)}}
     };
     el.appendChild(c);
   });
 }
 function selectedChip(el){const c=el.querySelector('.chip.on');return c?c.textContent:''}
+function selectedChips(el){return [...el.querySelectorAll('.chip.on')].map(c=>c.textContent)}
 function allTopics(){const s=new Set();DATA.forEach(q=>{(q.topics&&q.topics.length?q.topics:[q.chapter]).forEach(t=>{if(t)s.add(t)})});return [...s].sort((a,b)=>a.localeCompare(b,'zh'))}
 function refreshTopicList(){
   const dl=$('topicList');if(!dl)return;
@@ -979,7 +1003,7 @@ function openAdd(){
   editingId=null;pendingImg=null;pendingFigure=false;pendingTopics=[];pendingGroupId=null;
   $('addTitle').textContent='新增錯題';
   buildChips($('fSubject'),SUBJECTS,(localStorage.getItem('cuoti_lastsubj')||'數學'),refreshTopicList);
-  buildChips($('fCause'),CAUSES,'',null,true);
+  buildChips($('fCause'),CAUSES,[],null,false,true);
   ['fChapter','fType','fQuestion','fMyAns','fAns','fExplain','fSource','fPassage'].forEach(i=>$(i).value='');
   $('fDiff').value='中';
   refreshTopicList();renderTopicChips();
@@ -993,7 +1017,7 @@ function openEdit(id){
   pendingMime=(pendingImg instanceof Blob)?(pendingImg.type||'image/jpeg'):((typeof pendingImg==='string'&&pendingImg.indexOf('data:')===0)?(pendingImg.slice(5,pendingImg.indexOf(',')).split(';')[0]||'image/jpeg'):'image/jpeg');
   $('addTitle').textContent='編輯錯題';
   buildChips($('fSubject'),SUBJECTS,q.subject,refreshTopicList);
-  buildChips($('fCause'),CAUSES,q.cause,null,true);
+  buildChips($('fCause'),CAUSES,(q.causes&&q.causes.length?q.causes:(q.cause?[q.cause]:[])),null,false,true);
   pendingTopics=(q.topics&&q.topics.length)?q.topics.slice():(q.chapter?[q.chapter]:[]);
   refreshTopicList();renderTopicChips();
   $('fChapter').value='';$('fType').value=q.type||'';$('fDiff').value=q.diff||'中';
@@ -1129,7 +1153,7 @@ async function saveQuestion(keepOpen){
   Object.assign(q,{
     subject,chapter:topics[0]||'',topics:topics,type:$('fType').value.trim(),diff:$('fDiff').value,
     question,myAns:$('fMyAns').value.trim(),ans:$('fAns').value.trim(),
-    explain:$('fExplain').value.trim(),cause:selectedChip($('fCause')),source:$('fSource').value.trim(),
+    explain:$('fExplain').value.trim(),causes:selectedChips($('fCause')),cause:selectedChips($('fCause'))[0]||'',source:$('fSource').value.trim(),
     passage:$('fPassage').value.trim(),groupId:pendingGroupId||q.groupId||null,image:imageToStore,hasFigure:pendingFigure,updatedAt:now
   });
   try{
@@ -1175,12 +1199,21 @@ function initFilters(){
   const tset=new Set();DATA.filter(q=>!curSubjFilter||q.subject===curSubjFilter).forEach(q=>{(q.topics&&q.topics.length?q.topics:[q.chapter]).forEach(t=>{if(t)tset.add(t)})});const topics=[...tset].sort((a,b)=>a.localeCompare(b,'zh'));
   ft.innerHTML='<option value="">全部主題</option>'+topics.map(t=>`<option value="${esc(t)}">${esc(t)}</option>`).join('');
   ft.value=topics.includes(prev)?prev:'';
-  const fc2=$('filterCause2');if(fc2&&fc2.options.length<=1)CAUSES.forEach(c=>fc2.add(new Option(c,c)));
+  const fc2=$('filterCause2');if(fc2){const pc=fc2.value;fc2.innerHTML='<option value="">全部錯因</option>'+CAUSES.map(c=>`<option value="${esc(c)}">${esc(c)}</option>`).join('');fc2.value=CAUSES.includes(pc)?pc:'';}
+  const pool=DATA.filter(q=>!curSubjFilter||q.subject===curSubjFilter);
+  // 單元（依目前科目）
+  const fu=$('filterUnit');if(fu){const pu=fu.value;const units=curSubjFilter?curriculumFor(curSubjFilter).map(g=>g.u):[];fu.innerHTML='<option value="">全部單元</option>'+units.map(u=>`<option value="${esc(u)}">${esc(u)}</option>`).join('');fu.value=units.includes(pu)?pu:'';}
+  // 題型
+  const fty=$('filterType');if(fty){const pt=fty.value;const types=[...new Set(pool.map(q=>q.type).filter(Boolean))].sort();fty.innerHTML='<option value="">全部題型</option>'+types.map(t=>`<option value="${esc(t)}">${esc(t)}</option>`).join('');fty.value=types.includes(pt)?pt:'';}
+  // 來源
+  const fso=$('filterSource');if(fso){const ps=fso.value;const srcs=[...new Set(pool.map(q=>q.source).filter(Boolean))].sort();fso.innerHTML='<option value="">全部來源</option>'+srcs.map(t=>`<option value="${esc(t)}">${esc(t)}</option>`).join('');fso.value=srcs.includes(ps)?ps:'';}
 }
+function topicUnit(subject,topic){const gs=curriculumFor(subject);for(const g of gs){if(g.t.indexOf(topic)>=0)return g.u;}return ''}
 function subjClass(s){return {'國文':'chi','英文':'eng','數學':'math','自然':'sci','社會':'soc','歷史':'his','地理':'geo','公民':'civ'}[s]||'other'}
 
-let listView='group', listPage=1, starFilter=false, lastFiltered=[], listQuery='';
+let listView='group', listPage=1, starFilter=false, lastFiltered=[], listQuery='', groupBy='chapter', showAllWeak=false;
 const PAGE=60;
+function setGroupBy(v){groupBy=v;renderList();}
 function toggleStarFilter(){starFilter=!starFilter;const b=$('starToggle');b.classList.toggle('on',starFilter);b.textContent=starFilter?'★ 重點':'☆ 重點';renderList();}
 function toggleFilterAdv(){const a=$('filterAdvanced');const open=a.style.display==='none';a.style.display=open?'block':'none';$('filterAdvBtn').classList.toggle('on',open);}
 function listSearchInput(){listQuery=normText($('listSearch').value.trim());renderList();}
@@ -1189,23 +1222,38 @@ function statusMatch(q,status){
   if(status==='leech')return !!q.leech&&!q.retired;
   return statusOf(q)===status;
 }
-function anyFilterActive(){return !!(curSubjFilter||($('filterTopic')||{}).value||($('filterStatus')||{}).value||($('filterDiff')||{}).value||($('filterCause2')||{}).value||starFilter||listQuery)}
+function qCauses(q){return (q.causes&&q.causes.length?q.causes:(q.cause?[q.cause]:[]))}
+function anyFilterActive(){return !!(curSubjFilter||['filterTopic','filterStatus','filterDiff','filterCause2','filterUnit','filterType','filterSource'].some(id=>($(id)||{}).value)||starFilter||listQuery)}
 function clearFilters(){
   curSubjFilter='';starFilter=false;listQuery='';
-  ['filterTopic','filterStatus','filterDiff','filterCause2'].forEach(id=>{const e=$(id);if(e)e.value=''});
+  ['filterTopic','filterStatus','filterDiff','filterCause2','filterUnit','filterType','filterSource'].forEach(id=>{const e=$(id);if(e)e.value=''});
   if($('sortBy'))$('sortBy').value='new';
   if($('listSearch'))$('listSearch').value='';
   const sb=$('starToggle');if(sb){sb.classList.remove('on');sb.textContent='☆ 重點'}
   initFilters();renderList();
 }
+const FKEYS=['filterTopic','filterStatus','sortBy','filterDiff','filterCause2','filterUnit','filterType','filterSource'];
+function saveFilterState(){try{const st={sub:curSubjFilter,star:starFilter,q:$('listSearch')?$('listSearch').value:'',gb:groupBy,view:listView};FKEYS.forEach(k=>st[k]=($(k)||{}).value||'');localStorage.setItem('cuoti_filter',JSON.stringify(st));}catch(e){}}
+function loadFilterState(){try{const st=JSON.parse(localStorage.getItem('cuoti_filter')||'null');if(!st)return;curSubjFilter=st.sub||'';starFilter=!!st.star;groupBy=st.gb||'chapter';listView=st.view||'group';if($('listSearch')){$('listSearch').value=st.q||'';listQuery=normText(st.q||'');}FKEYS.forEach(k=>{if($(k)&&st[k]!=null)$(k).value=st[k];});if($('groupBySel'))$('groupBySel').value=groupBy;document.querySelectorAll('#viewSeg button').forEach(b=>b.classList.toggle('on',b.dataset.v===listView));const sb=$('starToggle');if(sb){sb.classList.toggle('on',starFilter);sb.textContent=starFilter?'★ 重點':'☆ 重點'}}catch(e){}}
+function getPresets(){try{return JSON.parse(localStorage.getItem('cuoti_presets')||'[]')}catch(e){return []}}
+function savecurPreset(){const name=prompt('把目前篩選存成常用組合，取個名字：');if(name==null)return;const nm=name.trim();if(!nm)return;const st={sub:curSubjFilter,star:starFilter,q:$('listSearch').value,gb:groupBy,view:listView};FKEYS.forEach(k=>st[k]=($(k)||{}).value||'');const ps=getPresets().filter(p=>p.name!==nm);ps.push({name:nm,st});localStorage.setItem('cuoti_presets',JSON.stringify(ps.slice(-6)));renderPresets();toast('已存常用「'+nm+'」');}
+function applyPreset(i){const p=getPresets()[i];if(!p)return;const st=p.st;curSubjFilter=st.sub||'';starFilter=!!st.star;groupBy=st.gb||'chapter';listView=st.view||'group';initFilters();FKEYS.forEach(k=>{if($(k)&&st[k]!=null)$(k).value=st[k]});if($('listSearch')){$('listSearch').value=st.q||'';listQuery=normText(st.q||'')}if($('groupBySel'))$('groupBySel').value=groupBy;document.querySelectorAll('#viewSeg button').forEach(b=>b.classList.toggle('on',b.dataset.v===listView));const sb=$('starToggle');if(sb){sb.classList.toggle('on',starFilter);sb.textContent=starFilter?'★ 重點':'☆ 重點'}renderList();}
+function delPreset(i){const ps=getPresets();ps.splice(i,1);localStorage.setItem('cuoti_presets',JSON.stringify(ps));renderPresets();}
+function renderPresets(){const el=$('presetBar');if(!el)return;const ps=getPresets();el.innerHTML='<div class="chip" onclick="savecurPreset()" style="border-style:dashed">＋ 存目前篩選</div>'+ps.map((p,i)=>`<div class="chip" onclick="applyPreset(${i})">${esc(p.name)} <span onclick="event.stopPropagation();delPreset(${i})" style="opacity:.6;font-weight:800">×</span></div>`).join('');}
+/* 近期正確率 */
+function recordAnswer(correct){try{const d=ymd(new Date());const m=JSON.parse(localStorage.getItem('cuoti_daily')||'{}');const o=m[d]||{c:0,t:0};o.t++;if(correct)o.c++;m[d]=o;localStorage.setItem('cuoti_daily',JSON.stringify(m));}catch(e){}}
 function currentFilteredList(){
-  const topic=$('filterTopic').value,status=$('filterStatus').value,sort=$('sortBy').value,diff=$('filterDiff').value,cause=$('filterCause2').value;
+  const topic=$('filterTopic').value,status=$('filterStatus').value,sort=$('sortBy').value,diff=$('filterDiff').value,cause=$('filterCause2').value,
+        unit=($('filterUnit')||{}).value||'',type=($('filterType')||{}).value||'',source=($('filterSource')||{}).value||'';
   let list=DATA.filter(q=>
     (!curSubjFilter||q.subject===curSubjFilter)&&
     (!topic||q.chapter===topic||(q.topics&&q.topics.indexOf(topic)>=0))&&
     (!status||statusMatch(q,status))&&
     (!diff||(q.diff||'中')===diff)&&
-    (!cause||q.cause===cause)&&
+    (!cause||qCauses(q).indexOf(cause)>=0)&&
+    (!unit||(q.topics&&q.topics.length?q.topics:[q.chapter]).some(t=>t&&topicUnit(q.subject,t)===unit))&&
+    (!type||q.type===type)&&
+    (!source||q.source===source)&&
     (!starFilter||q.star)&&
     (!listQuery||normText([q.question,q.explain,q.chapter,(q.topics||[]).join(' '),q.source,q.ans,q.myAns].join(' ')).includes(listQuery)));
   if(sort==='wrong')list.sort((a,b)=>((b.lapses||0)-(a.lapses||0))||(b.createdAt-a.createdAt));
@@ -1217,18 +1265,21 @@ function renderMotivate(){
   const el=$('listMotivate');if(!el)return;
   if(!DATA.length){el.innerHTML='';return}
   const due=DATA.filter(dueForReview).length, mastered=DATA.filter(q=>q.mastered).length, s=curStreak(), gd=gsatDays();
-  const cd=(gd!=null&&gd>=0)?`<span class="pill" style="font-size:11.5px;padding:3px 9px">🎯 學測 ${gd} 天</span>`:'';
+  const unm=DATA.filter(q=>!q.mastered&&!q.retired).length;
+  const pace=(gd!=null&&gd>0&&unm>0)?Math.ceil(unm/gd):0;
+  const cd=(gd!=null&&gd>=0)?`<span class="pill" style="font-size:11.5px;padding:3px 9px">🎯 學測 ${gd} 天</span> `:'';
+  const pc=pace?`<span class="pill" style="font-size:11.5px;padding:3px 9px">📈 尚 ${unm} 未精熟·每天約 ${pace} 題可過完</span>`:'';
   el.innerHTML=`<div class="card" style="display:flex;align-items:center;gap:11px;padding:10px 13px">
     <div style="text-align:center;min-width:40px"><div style="font-size:22px;font-weight:800;color:#f97316;line-height:1">${s}</div><div class="muted" style="font-size:10.5px">🔥天</div></div>
     <div style="flex:1;min-width:0">
       ${due?`<div style="font-weight:700;font-size:14.5px">今天 ${due} 題待複習</div>`:`<div style="font-weight:700;font-size:14.5px;color:var(--ok)">今日複習完成 🎉</div>`}
-      <div style="margin-top:3px">${cd}</div>
+      <div style="margin-top:3px;line-height:1.9">${cd}${pc}</div>
     </div>
     ${due?`<button class="btn sm" style="flex:none" onclick="go('review')">去複習</button>`:''}
   </div>`;
 }
 function renderList(){
-  renderMotivate();
+  renderMotivate();saveFilterState();
   const cb=$('clearFilterBtn');if(cb)cb.style.display=anyFilterActive()?'':'none';
   const area=$('listArea'),fc=$('filterCard'),more=$('listMore'),rfb=$('reviewFilteredBtn');
   area.className=listView;listPage=1;
@@ -1252,22 +1303,30 @@ function renderList(){
   if(!list.length){area.innerHTML=emptyHTML('沒有符合的錯題','換個篩選條件試試');if(more)more.innerHTML='';return}
   if(listView==='group'){
     if(more)more.innerHTML='';
+    const gk=q=>{
+      if(groupBy==='unit')return q.subject+'　／　'+((topicUnit(q.subject,q.chapter))||'未分類單元');
+      if(groupBy==='source')return q.source||'未標來源';
+      if(groupBy==='type')return q.type||'未標題型';
+      if(groupBy==='diff')return '難度 '+(q.diff||'中');
+      return q.subject+'　／　'+(q.chapter||'未分類');
+    };
     const groups={};
-    list.forEach(q=>{const key=q.subject+'　／　'+(q.chapter||'未分類');(groups[key]=groups[key]||[]).push(q)});
+    list.forEach(q=>{const key=gk(q);(groups[key]=groups[key]||[]).push(q)});
+    const bySubjKey=(groupBy==='chapter'||groupBy==='unit');
     const keys=Object.keys(groups).sort((a,b)=>{
-      const sa=SUBJECTS.indexOf(a.split('　／　')[0]),sb=SUBJECTS.indexOf(b.split('　／　')[0]);
-      return sa!==sb?sa-sb:a.localeCompare(b,'zh');
+      if(bySubjKey){const sa=SUBJECTS.indexOf(a.split('　／　')[0]),sb=SUBJECTS.indexOf(b.split('　／　')[0]);if(sa!==sb)return sa-sb;}
+      return a.localeCompare(b,'zh');
     });
     area.innerHTML=keys.map(k=>{
-      const subj=k.split('　／　')[0], gtopic=k.split('　／　')[1];
+      const subj=bySubjKey?k.split('　／　')[0]:'', gtopic=bySubjKey?k.split('　／　')[1]:'';
       const items=groups[k];
       const due=items.filter(q=>!q.mastered).length;
+      const dot=bySubjKey?`<span class="dot" style="background:var(--s-${subjClass(subj)});flex:none"></span>`:'';
+      const rbtn=(bySubjKey&&groupBy==='chapter'&&due)?`<button class="btn sm" style="padding:5px 11px;font-size:12px;flex:none" onclick="reviewTopic('${esc(subj)}','${esc(gtopic==='未分類'?'':gtopic)}')">🔥 複習這主題 ${due}</button>`:(due?`<button class="btn sm" style="padding:5px 11px;font-size:12px;flex:none" onclick="reviewGroupList(${JSON.stringify(items.filter(q=>!q.mastered).map(q=>q.id)).replace(/"/g,'&quot;')})">🔥 複習這組 ${due}</button>`:'<span class="mastered-badge">✓ 全精熟</span>');
       return `<div style="margin:16px 4px 8px;display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-        <span class="dot" style="background:var(--s-${subjClass(subj)});flex:none"></span>
-        <b style="font-size:15px">${esc(k)}</b><span class="muted" style="font-size:12px">（${items.length}）</span>
-        <span style="flex:1;min-width:20px"></span>
-        ${due?`<button class="btn sm" style="padding:5px 11px;font-size:12px;flex:none" onclick="reviewTopic('${esc(subj)}','${esc(gtopic==='未分類'?'':gtopic)}')">🔥 複習這主題 ${due}</button>`:'<span class="mastered-badge">✓ 全精熟</span>'}</div>`
-        +'<div class="gcards">'+items.map(q=>qcardHTML(q,true)).join('')+'</div>';
+        ${dot}<b style="font-size:15px">${esc(k)}</b><span class="muted" style="font-size:12px">（${items.length}）</span>
+        <span style="flex:1;min-width:20px"></span>${rbtn}</div>`
+        +'<div class="gcards">'+items.map(q=>qcardHTML(q,groupBy==='chapter')).join('')+'</div>';
     }).join('');
     return;
   }
@@ -1286,6 +1345,68 @@ function reviewFiltered(){
   customReviewList=list;reviewScope='custom';reviewSubj='';go('review',true);
 }
 function reviewOne(id){const q=DATA.find(x=>x.id===id);if(!q)return;closeModal('viewModal');customReviewList=[q];reviewScope='custom';reviewSubj='';go('review',true);}
+function addForTopic(subject,topic){openAdd();buildChips($('fSubject'),SUBJECTS,subject,refreshTopicList);pendingTopics=[topic];renderTopicChips();refreshTopicList();toast('新增「'+topic+'」的一題');}
+function reviewGroupList(ids){const set=new Set(ids);const list=DATA.filter(q=>set.has(q.id));if(!list.length){toast('這組沒有待複習');return}customReviewList=list;reviewScope='custom';reviewSubj='';go('review',true);}
+/* ================= 限時模擬考 ================= */
+let mockQueue=[],mockIdx=0,mockAns=[],mockDeadline=0,mockTimer=0;
+function mockPool(kind){
+  if(kind==='cram')return DATA.filter(q=>!q.mastered&&((q.diff==='難')||q.leech));
+  if(kind==='all')return DATA.slice();
+  return DATA.filter(q=>!q.mastered);
+}
+function openMock(){
+  $('mockBody').innerHTML=`<div class="grabber"></div><h2>⏱ 限時模擬考</h2>
+    <p class="muted" style="margin:2px 0 12px">模擬臨場：限時作答、交卷自動計分（不影響間隔排程）</p>
+    <label class="fld">範圍</label>
+    <select id="mockKind"><option value="unmastered">未精熟的題</option><option value="cram">難題+頑固</option><option value="all">全部題</option></select>
+    <label class="fld">題數</label>
+    <select id="mockN"><option value="10">10 題</option><option value="20" selected>20 題</option><option value="30">30 題</option><option value="9999">全部</option></select>
+    <label class="fld">限時（分鐘）</label>
+    <input id="mockMin" type="number" value="20" min="1" max="180">
+    <div class="row" style="margin-top:16px">
+      <button class="btn ghost" onclick="closeModal('mockModal')">取消</button>
+      <button class="btn" onclick="startMock()">開始</button>
+    </div>`;
+  openModal('mockModal');
+}
+function startMock(){
+  const kind=$('mockKind').value, n=parseInt($('mockN').value,10)||20, mins=Math.max(1,parseInt($('mockMin').value,10)||20);
+  let pool=shuffle(mockPool(kind).slice());
+  if(!pool.length){toast('這個範圍沒有題目');return}
+  mockQueue=pool.slice(0,n);mockIdx=0;mockAns=new Array(mockQueue.length).fill('');
+  mockDeadline=Date.now()+mins*60000;
+  mockTick();mockShow();
+}
+function mockTick(){clearInterval(mockTimer);mockTimer=setInterval(()=>{const el=$('mockClock');const left=Math.max(0,mockDeadline-Date.now());if(el)el.textContent=Math.floor(left/60000)+':'+String(Math.floor(left/1000)%60).padStart(2,'0');if(left<=0){clearInterval(mockTimer);mockFinish();}},500);}
+function mockShow(){
+  if(mockIdx>=mockQueue.length){mockFinish();return}
+  const q=mockQueue[mockIdx];
+  $('mockBody').innerHTML=`<div class="grabber"></div>
+    <div style="display:flex;align-items:center;margin-bottom:8px"><b>第 ${mockIdx+1}/${mockQueue.length} 題</b><span style="flex:1"></span><span class="pill" style="color:var(--bad)">⏱ <span id="mockClock">–</span></span></div>
+    ${imgURL(q)?`<img src="${esc(imgURL(q))}" style="width:100%;border-radius:10px;margin-bottom:8px;background:#0008">`:''}
+    <div class="card" style="background:var(--card2)"><div style="line-height:1.7;white-space:pre-wrap">${mathRender(q.question)||'（僅照片）'}</div></div>
+    <label class="fld">你的作答</label>
+    <textarea id="mockInput" placeholder="寫下答案">${esc(mockAns[mockIdx]||'')}</textarea>
+    <div class="row" style="margin-top:12px">
+      ${mockIdx>0?`<button class="btn ghost" onclick="mockNav(-1)">← 上一題</button>`:''}
+      ${mockIdx<mockQueue.length-1?`<button class="btn" onclick="mockNav(1)">下一題 →</button>`:`<button class="btn ok" onclick="mockFinish()">✅ 交卷</button>`}
+    </div>
+    <button class="btn bad ghost full" style="margin-top:8px" onclick="if(confirm('放棄本次模擬？')){clearInterval(mockTimer);closeModal(\'mockModal\')}">放棄</button>`;
+}
+function mockCapture(){const el=$('mockInput');if(el)mockAns[mockIdx]=el.value;}
+function mockNav(d){mockCapture();mockIdx=Math.min(mockQueue.length-1,Math.max(0,mockIdx+d));mockShow();}
+async function mockFinish(){
+  mockCapture();clearInterval(mockTimer);
+  let correct=0;const rows=mockQueue.map((q,i)=>{const ok=q.ans&&ansMatch(mockAns[i],q.ans);if(ok)correct++;return {q,my:mockAns[i],ok};});
+  const pct=Math.round(correct/mockQueue.length*100);
+  $('mockBody').innerHTML=`<div class="grabber"></div><h2>📊 模擬結果</h2>
+    <div class="card" style="text-align:center;background:var(--grad);border:none;color:#fff;padding:16px">
+      <div style="font-size:34px;font-weight:800">${correct}/${mockQueue.length}</div><div style="opacity:.9">正確率 ${pct}%</div></div>
+    <div class="muted" style="font-size:12px;margin:10px 0 6px">逐題（有標正解者自動判；文字題請自行對照）</div>
+    ${rows.map((r,i)=>`<div class="card" style="background:var(--card2);padding:10px"><div style="font-size:12px">第 ${i+1} 題 ${r.ok?'<span class="correct">✓</span>':(r.q.ans?'<span class="wrong">✗</span>':'<span class="muted">—</span>')} · ${esc(r.q.subject)}${r.q.chapter?'·'+esc(r.q.chapter):''}</div>
+      <div style="font-size:12.5px;margin-top:4px">你：${mathRender(r.my||'（未答）')}　｜　正解：${mathRender(r.q.ans||'—')}</div></div>`).join('')}
+    <button class="btn full" style="margin-top:12px" onclick="closeModal('mockModal')">完成</button>`;
+}
 /* 批次多選 */
 let selectMode=false, selectedIds=new Set();
 function cardClick(id){if(selectMode){if(selectedIds.has(id))selectedIds.delete(id);else selectedIds.add(id);renderList();renderBatchBar();}else viewQ(id);}
@@ -1312,6 +1433,7 @@ function qcardHTML(q,inGroup){
       ${inGroup?'':(q.chapter?`<span class="tag">${esc(q.chapter)}</span>`:'')}
       ${extra}
       ${q.leech?'<span class="tag" style="color:var(--bad)">🔴</span>':''}
+      ${q.groupId?'<span class="tag" title="題組">📎</span>':''}
       ${q.hasFigure?`<span class="tag" title="含圖形">📐</span>`:''}
       ${q.cause?`<span class="tag">⚠️ ${esc(q.cause)}</span>`:''}
       <span style="flex:1"></span>${stBadge}
@@ -1347,6 +1469,7 @@ function viewQ(id){
     ${q.cause?`<span class="pill">⚠️ ${esc(q.cause)}</span> `:''}
     ${q.source?`<span class="pill">🏷️ ${esc(q.source)}</span>`:''}
     <div class="muted" style="margin:12px 0;font-size:12px">加入於 ${new Date(q.createdAt).toLocaleDateString()} · 複習 ${q.reviewCount||0} 次 · 連對 ${q.streak||0}${q.lapses?' · 卡關 '+q.lapses+' 次':''}</div>
+    ${q.groupId?(()=>{const mates=DATA.filter(x=>x.groupId===q.groupId);const idx=mates.findIndex(x=>x.id===q.id);return `<div class="card" style="background:var(--card2);padding:10px"><b style="font-size:13px">📎 題組 ${idx+1}/${mates.length}</b> <span class="muted" style="font-size:12px">同一篇/題幹</span><div class="chips" style="margin-top:6px">${mates.map((m,i)=>`<div class="chip${m.id===q.id?' on':''}" style="font-size:11px" onclick="viewQ('${esc(m.id)}')">第${i+1}題</div>`).join('')}</div><button class="btn ghost sm full" style="margin-top:8px" onclick="reviewGroupList(${JSON.stringify(mates.map(m=>m.id)).replace(/"/g,'&quot;')})">🔥 複習整組 ${mates.length} 題</button></div>`;})():''}
     <button class="btn full" style="margin-bottom:8px" onclick="reviewOne('${esc(q.id)}')">🔥 複習這題</button>
     <div class="row" style="margin-bottom:8px">
       <button class="btn ghost" onclick="toggleStar('${esc(q.id)}')">${q.star?'★ 取消重點':'☆ 標記重點'}</button>
@@ -1440,6 +1563,7 @@ let reviewQueue=[],reviewIdx=0,revealed=false,grading=false,reviewScope=null,myW
 function reviewTopic(subject,topic){reviewScope={subject,topic:topic||''};reviewSubj='';go('review',true);}
 function reviewAll(){reviewScope='all';buildReviewQueue();}
 function reviewLeech(){reviewScope='leech';buildReviewQueue();}
+function reviewCram(){reviewScope='cram';buildReviewQueue();}
 function reviewToday(){reviewScope=null;reviewSubj='';buildReviewQueue();}
 function setReviewSubj(s){reviewSubj=(reviewSubj===s?'':s);buildReviewQueue();}
 function dueForReview(q){if(q.retired)return false;if((q.nextReview||0)>today())return false;if(q.mastered)return (q.maint!=null&&q.maint<MAINT.length);return true;}
@@ -1447,6 +1571,7 @@ function buildReviewQueue(){
   let list;
   if(reviewScope==='custom')list=shuffle(customReviewList.slice());
   else if(reviewScope==='leech')list=shuffle(DATA.filter(q=>q.leech&&!q.retired&&(!reviewSubj||q.subject===reviewSubj)).slice());
+  else if(reviewScope==='cram')list=shuffle(DATA.filter(q=>!q.mastered&&((q.diff==='難')||q.leech)&&(!reviewSubj||q.subject===reviewSubj)).slice());
   else if(reviewScope==='all')list=shuffle(DATA.filter(q=>!q.mastered).slice());
   else if(reviewScope&&typeof reviewScope==='object')list=shuffle(DATA.filter(q=>!q.mastered&&q.subject===reviewScope.subject&&(q.chapter||'')===reviewScope.topic).slice());
   else{
@@ -1459,7 +1584,7 @@ function buildReviewQueue(){
   reviewQueue=list;reviewIdx=0;revealed=false;myWrite='';revStart=Date.now();
   showReviewCard();
 }
-function scopeLabel(){if(reviewScope==='all')return '全部未精熟';if(reviewScope==='custom')return '篩選結果';if(reviewScope==='leech')return '🔴 頑固題';if(reviewScope&&typeof reviewScope==='object')return reviewScope.subject+(reviewScope.topic?'·'+reviewScope.topic:'');return '今日到期'+(reviewSubj?'·'+reviewSubj:'')}
+function scopeLabel(){if(reviewScope==='all')return '全部未精熟';if(reviewScope==='custom')return '篩選結果';if(reviewScope==='leech')return '🔴 頑固題';if(reviewScope==='cram')return '⚡ 難題+頑固';if(reviewScope&&typeof reviewScope==='object')return reviewScope.subject+(reviewScope.topic?'·'+reviewScope.topic:'');return '今日到期'+(reviewSubj?'·'+reviewSubj:'')}
 function startTimer(){stopTimer();if(!settings.timer)return;revTimerId=setInterval(()=>{const el=$('revTimer');if(!el){stopTimer();return}el.textContent='⏱ '+Math.round((Date.now()-revStart)/1000)+'s';},1000);}
 function stopTimer(){if(revTimerId){clearInterval(revTimerId);revTimerId=0}}
 function reviewHeader(){
@@ -1471,12 +1596,20 @@ function reviewHeader(){
       subs.map(s=>`<div class="chip${reviewSubj===s?' on':''}" onclick="setReviewSubj('${esc(s)}')"><span class="dot" style="background:var(--s-${subjClass(s)})"></span>${esc(s)}</div>`).join('')+'</div>';
   }
   const leechN=DATA.filter(q=>q.leech&&!q.retired).length;
+  const cramN=DATA.filter(q=>!q.mastered&&((q.diff==='難')||q.leech)).length;
+  const allN=DATA.filter(q=>!q.mastered).length;
+  const sc=v=>reviewScope===v?'btn':'btn ghost';
   return `<div class="card" style="padding:9px 12px;margin-bottom:10px">
     <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
       ${streakBadge()}<span style="flex:1"></span>
-      <span class="muted" style="font-size:12px">範圍：<b style="color:var(--txt)">${esc(scopeLabel())}</b></span>
-      ${(reviewScope||reviewSubj)?`<button class="btn ghost sm" style="padding:4px 9px;font-size:11.5px" onclick="reviewToday()">↩ 今日到期</button>`:''}
-      ${(reviewScope!=='leech'&&leechN)?`<button class="btn sm bad" style="padding:4px 9px;font-size:11.5px" onclick="reviewLeech()">🔴 頑固題 ${leechN}</button>`:''}
+      <span class="muted" style="font-size:12px">${esc(scopeLabel())}</span>
+    </div>
+    <div class="row" style="gap:6px;margin-top:8px;flex-wrap:wrap">
+      <button class="${sc(null)} sm" style="flex:1;min-width:80px;padding:6px 8px;font-size:12px" onclick="reviewToday()">📅 今日</button>
+      <button class="${sc('all')} sm" style="flex:1;min-width:80px;padding:6px 8px;font-size:12px" onclick="reviewAll()">🔁 全部 ${allN}</button>
+      ${cramN?`<button class="${sc('cram')} sm" style="flex:1;min-width:80px;padding:6px 8px;font-size:12px" onclick="reviewCram()">⚡ 難+頑固 ${cramN}</button>`:''}
+      ${leechN?`<button class="${sc('leech')} sm" style="flex:1;min-width:80px;padding:6px 8px;font-size:12px" onclick="reviewLeech()">🔴 頑固 ${leechN}</button>`:''}
+      <button class="btn ghost sm" style="flex:1;min-width:80px;padding:6px 8px;font-size:12px" onclick="openMock()">⏱ 限時模擬</button>
     </div>${subjChips}
   </div>`;
 }
@@ -1557,15 +1690,29 @@ async function grade(correct){
       }
     }
     try{await dbPut(q)}catch(err){toast('儲存失敗：'+((err&&err.message)||'請重試'))}
-    bumpStreak();
+    bumpStreak();recordAnswer(correct);
     reviewIdx++;revealed=false;myWrite='';revStart=Date.now();showReviewCard();
   }finally{grading=false}
 }
 function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
 
 /* ================= 統計 ================= */
+function renderTrend(){
+  const el=$('statTrend');if(!el)return;
+  let m={};try{m=JSON.parse(localStorage.getItem('cuoti_daily')||'{}')}catch(e){}
+  const days=[];const base=new Date();base.setHours(0,0,0,0);
+  for(let i=13;i>=0;i--){const d=new Date(base);d.setDate(d.getDate()-i);days.push(ymd(d));}
+  const any=days.some(d=>m[d]&&m[d].t);
+  if(!any){el.innerHTML='<div class="muted" style="font-size:12px">開始複習後，這裡會顯示每天答對率趨勢</div>';return;}
+  el.innerHTML='<div style="display:flex;align-items:flex-end;gap:3px;height:70px">'+days.map(d=>{
+    const o=m[d];const pct=o&&o.t?Math.round(o.c/o.t*100):null;
+    const h=pct==null?4:Math.max(6,pct*.64);
+    const col=pct==null?'var(--line)':(pct>=80?'var(--ok)':pct>=50?'var(--warn)':'var(--bad)');
+    return `<div style="flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center" title="${d}：${o?o.c+'/'+o.t+' ('+pct+'%)':'無'}"><div style="width:100%;height:${h}px;background:${col};border-radius:3px"></div></div>`;
+  }).join('')+'</div><div class="muted" style="font-size:10px;display:flex;justify-content:space-between;margin-top:4px"><span>14天前</span><span>今天</span></div>';
+}
 function renderStats(){
-  renderCountdown('statCountdown');
+  renderCountdown('statCountdown');renderTrend();
   const total=DATA.length, mastered=DATA.filter(q=>q.mastered).length;
   const due=DATA.filter(q=>!q.mastered&&(q.nextReview||0)<=today()).length;
   // 先報喜（鼓勵）
@@ -1578,13 +1725,15 @@ function renderStats(){
     <div class="stat"><div class="n" style="color:var(--ok)">${mastered}</div><div class="l">已精熟</div></div>`;
   // 弱點主題（依「未精熟數」排序，顯示精熟率）
   const byT={};DATA.forEach(q=>{const t=(q.subject)+'　／　'+(q.chapter||'未分類');const o=(byT[t]=byT[t]||{n:0,due:0,mast:0,subj:q.subject,topic:q.chapter||''});o.n++;if(q.mastered)o.mast++;else o.due++;});
-  const te=Object.entries(byT).filter(([k,v])=>v.due>0).sort((a,b)=>b[1].due-a[1].due||b[1].n-a[1].n).slice(0,12);
+  const teAll=Object.entries(byT).filter(([k,v])=>v.due>0).sort((a,b)=>b[1].due-a[1].due||b[1].n-a[1].n);
+  const te=showAllWeak?teAll:teAll.slice(0,12);
   const maxT=Math.max(1,...te.map(e=>e[1].due));
-  $('statTopic').innerHTML=te.length?te.map(([k,v])=>`
+  $('statTopic').innerHTML=(te.length?te.map(([k,v])=>`
     <div class="bar-row" style="cursor:pointer" onclick="reviewTopic('${esc(v.subj)}','${esc(v.topic)}')" title="複習這個主題">
       <div class="name" style="width:96px;font-size:12px">${esc(k.replace('　／　','·'))}</div>
       <div class="bar-wrap"><div class="bar-fill" style="width:${Math.round(v.due/maxT*100)}%;background:var(--s-${subjClass(v.subj)})"></div></div>
-      <div class="val" style="width:auto;font-size:11px">${v.due}待·熟${v.mast}/${v.n}</div></div>`).join(''):'<div class="muted">目前沒有未精熟的主題 🎉</div>';
+      <div class="val" style="width:auto;font-size:11px">${v.due}待·熟${v.mast}/${v.n}</div></div>`).join(''):'<div class="muted">目前沒有未精熟的主題 🎉</div>')
+    +(teAll.length>12?`<button class="btn ghost sm full" style="margin-top:8px" onclick="showAllWeak=!showAllWeak;renderStats()">${showAllWeak?'收起':'看全部 '+teAll.length+' 個弱點主題'}</button>`:'');
   // 課綱覆蓋（正規化比對；可點開看知識點地圖）
   const subjSet=[...new Set(DATA.map(q=>q.subject))].filter(s=>curriculumFor(s).length);
   const covHtml=subjSet.map((s,i)=>{
@@ -1593,7 +1742,7 @@ function renderStats(){
     const hit=leaves.filter(l=>errMap[normText(l)]!=null).length;
     const custom=Object.values(errMap).filter(t=>!leaves.some(l=>normText(l)===normText(t)));
     const pct=Math.round(hit/Math.max(1,leaves.length)*100);
-    const detail=curriculumFor(s).map(g=>`<div style="margin:6px 0"><div class="tgu" style="font-size:11.5px">${esc(g.u)}</div><div class="chips">${g.t.map(t=>{const on=errMap[normText(t)]!=null;return `<div class="chip${on?' on':''}" style="font-size:11px;${on?'':'opacity:.55'}" ${on?`onclick="reviewTopic('${esc(s)}','${esc(t)}')"`:''}>${esc(t)}${on?'':''}</div>`;}).join('')}</div></div>`).join('')
+    const detail=curriculumFor(s).map(g=>`<div style="margin:6px 0"><div class="tgu" style="font-size:11.5px">${esc(g.u)}</div><div class="chips">${g.t.map(t=>{const on=errMap[normText(t)]!=null;return `<div class="chip${on?' on':''}" style="font-size:11px;${on?'':'opacity:.55'}" onclick="${on?`reviewTopic('${esc(s)}','${esc(t)}')`:`addForTopic('${esc(s)}','${esc(t).replace(/'/g,"\\'")}')`}" title="${on?'複習':'盲區·點此新增一題'}">${esc(t)}</div>`;}).join('')}</div></div>`).join('')
       +(custom.length?`<div class="tgu" style="font-size:11.5px;color:var(--warn);margin-top:8px">⚠️ 非課綱命名（可到主題管理合併）</div><div class="chips">${custom.map(t=>`<div class="chip" style="font-size:11px;border-color:var(--warn)">${esc(t)}</div>`).join('')}</div>`:'');
     return `<div>
       <div class="bar-row" style="cursor:pointer" onclick="var d=document.getElementById('cov${i}');d.style.display=d.style.display==='none'?'block':'none'">
@@ -1609,7 +1758,7 @@ function renderStats(){
   const maxS=Math.max(1,...Object.values(bySub));
   $('statSubject').innerHTML=SUBJECTS.filter(s=>bySub[s]>0).map(s=>bar(s,bySub[s],maxS,`var(--s-${subjClass(s)})`)).join('')||'<div class="muted">尚無資料</div>';
   // 錯因（次要）
-  const byC={};DATA.forEach(q=>{if(q.cause)byC[q.cause]=(byC[q.cause]||0)+1});
+  const byC={};DATA.forEach(q=>{qCauses(q).forEach(c=>{if(c)byC[c]=(byC[c]||0)+1})});
   const maxC=Math.max(1,...Object.values(byC));
   const ce=Object.entries(byC).sort((a,b)=>b[1]-a[1]);
   $('statCause').innerHTML=ce.length?ce.map(([c,n])=>bar(c,n,maxC,'var(--accent)')).join(''):'<div class="muted">（尚未標記錯因）</div>';
@@ -1850,6 +1999,7 @@ function importData(file){
             ans:typeof raw.ans==='string'?raw.ans:'',
             explain:typeof raw.explain==='string'?raw.explain:'',
             cause:typeof raw.cause==='string'?raw.cause:'',
+            causes:Array.isArray(raw.causes)?raw.causes.filter(c=>typeof c==='string'):(typeof raw.cause==='string'&&raw.cause?[raw.cause]:[]),
             source:typeof raw.source==='string'?raw.source:'',
             image:(safeImg(raw.image)?dataURLtoBlob(raw.image):(raw.image instanceof Blob?raw.image:null)),
             hasFigure:!!raw.hasFigure,star:!!raw.star,leech:!!raw.leech,
@@ -1894,12 +2044,12 @@ async function init(){
     $('listArea').innerHTML='<div class="empty"><div class="big">⚠️</div><div style="font-size:16px;font-weight:700;color:var(--txt)">本機儲存無法使用</div><div style="margin-top:6px">若使用「無痕/私密瀏覽」模式，錯題將無法儲存。請改用一般模式，或加到主畫面後開啟。</div></div>';
     toast('儲存空間無法使用（可能是無痕模式）');
   }
-  initFilters();renderList();updateInstallUI();checkBackupReminder();
+  initFilters();loadFilterState();initFilters();renderPresets();renderList();updateInstallUI();checkBackupReminder();
   registerSW();
 }
 
 /* ================= 版本更新機制 ================= */
-const APP_VERSION='12（2026-07-07 八評大改）';
+const APP_VERSION='13（2026-07-10 進階功能）';
 let swReg=null, swRefreshing=false;
 function showUpdateBanner(){$('updateBanner').classList.add('show')}
 function registerSW(){
@@ -1935,6 +2085,8 @@ async function checkUpdate(){
 }
 // 回頂鈕：列表頁捲動超過一屏時顯示
 window.addEventListener('scroll',()=>{const bt=$('backTop');if(!bt)return;const onList=$('page-list').classList.contains('on');bt.style.display=(onList&&window.scrollY>500)?'block':'none';},{passive:true});
+// 鍵盤彈出時把焦點輸入框捲到可見（visualViewport）
+document.addEventListener('focusin',e=>{const t=e.target;if(t&&(t.tagName==='TEXTAREA'||t.tagName==='INPUT')&&t.closest('.modal')){setTimeout(()=>{try{t.scrollIntoView({block:'center',behavior:'smooth'})}catch(_){}}, 200);}});
 // 鍵盤快捷（桌面/平板；輸入框內不攔）
 document.addEventListener('keydown',e=>{
   const tag=(e.target.tagName||'').toLowerCase(), typing=tag==='input'||tag==='textarea'||tag==='select'||e.target.isContentEditable;
