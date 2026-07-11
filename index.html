@@ -3,10 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<meta name="theme-color" content="#4f46e5">
+<meta name="theme-color" content="#6B5A8C">
 <title>錯題管理器</title>
 <link rel="manifest" href="manifest.webmanifest">
-<link rel="icon" href="icon.svg">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="icon" href="icon.svg" sizes="any">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-180.png">
 <!-- iOS 加入主畫面 -->
@@ -14,44 +15,53 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="錯題本">
+<link rel="stylesheet" href="ridgeline-ui.css">
 <style>
 :root{
-  /* 深色（預設） */
-  --bg:#0f1222; --bg2:#171a2e; --card:#20233c; --card2:#2a2e4d;
-  --line:#343a5e; --txt:#e8eaf6; --dim:#aab0d6;
-  --primary:#6366f1; --primary2:#818cf8; --primary-strong:#4f46e5; --primary-end:#7c3aed;
-  --grad:var(--grad);
+  /* 深色（預設）· 稜線霧紫 theme-heather */
+  --bg:#141E2B; --bg2:#1B2838; --card:#1B2838; --card2:#243447;
+  --line:#2A3A4E; --txt:#EEF3F6; --dim:#9BA8BE;
+  --primary:#8672A8; --primary2:#A594C4; --primary-strong:#6B5A8C; --primary-end:#8672A8;
+  --grad:#8672A8;
   --ok:#22c55e; --warn:#f59e0b; --bad:#ef4444; --accent:#eab308;
-  --card-sh:0 1px 2px rgba(0,0,0,.35),0 16px 34px -22px rgba(0,0,0,.95);
+  --card-sh:none;
   --radius:16px;
   /* 科目色（刻意避開 對錯紅綠、主色紫、錯因accent） */
   --s-chi:#fb7185; --s-eng:#38bdf8; --s-math:#c084fc; --s-sci:#2dd4bf; --s-soc:#fbbf24; --s-other:#94a3b8;
   --s-his:#fb923c; --s-geo:#22d3ee; --s-civ:#e879a9;
 }
 @media (prefers-color-scheme:light){:root{
-  --bg:#f4f6fc; --bg2:#eaeef8; --card:#ffffff; --card2:#f3f5fc;
-  --line:#e3e7f2; --txt:#1b1f33; --dim:#5c6280;
-  --primary:#5b56e0; --primary2:#6366f1; --primary-strong:#4f46e5; --primary-end:#7c3aed;
-  --grad:linear-gradient(135deg,#5b56e0,#7c3aed);
+  --bg:#F7F3EC; --bg2:#EFE9DD; --card:#FFFFFF; --card2:#F4EFE6;
+  --line:#E4DDCE; --txt:#141E2B; --dim:#6E8BA3;
+  --primary:#6B5A8C; --primary2:#8672A8; --primary-strong:#6B5A8C; --primary-end:#6B5A8C;
+  --grad:#8672A8;
   --ok:#16a34a; --warn:#d97706; --bad:#dc2626; --accent:#ca8a04;
-  --card-sh:0 1px 2px rgba(20,25,60,.06),0 12px 26px -18px rgba(30,40,120,.22);
+  --card-sh:none;
 }}
 :root[data-theme="dark"]{
-  --bg:#0f1222; --bg2:#171a2e; --card:#20233c; --card2:#2a2e4d;
-  --line:#343a5e; --txt:#e8eaf6; --dim:#aab0d6;
-  --primary:#6366f1; --primary2:#818cf8; --primary-strong:#4f46e5; --primary-end:#7c3aed;
-  --grad:var(--grad);
+  --bg:#141E2B; --bg2:#1B2838; --card:#1B2838; --card2:#243447;
+  --line:#2A3A4E; --txt:#EEF3F6; --dim:#9BA8BE;
+  --primary:#8672A8; --primary2:#A594C4; --primary-strong:#6B5A8C; --primary-end:#8672A8;
+  --grad:#8672A8;
   --ok:#22c55e; --warn:#f59e0b; --bad:#ef4444; --accent:#eab308;
-  --card-sh:0 1px 2px rgba(0,0,0,.35),0 16px 34px -22px rgba(0,0,0,.95);
+  --card-sh:none;
 }
 :root[data-theme="light"]{
-  --bg:#f4f6fc; --bg2:#eaeef8; --card:#ffffff; --card2:#f3f5fc;
-  --line:#e3e7f2; --txt:#1b1f33; --dim:#5c6280;
-  --primary:#5b56e0; --primary2:#6366f1; --primary-strong:#4f46e5; --primary-end:#7c3aed;
-  --grad:linear-gradient(135deg,#5b56e0,#7c3aed);
+  --bg:#F7F3EC; --bg2:#EFE9DD; --card:#FFFFFF; --card2:#F4EFE6;
+  --line:#E4DDCE; --txt:#141E2B; --dim:#6E8BA3;
+  --primary:#6B5A8C; --primary2:#8672A8; --primary-strong:#6B5A8C; --primary-end:#6B5A8C;
+  --grad:#8672A8;
   --ok:#16a34a; --warn:#d97706; --bad:#dc2626; --accent:#ca8a04;
-  --card-sh:0 1px 2px rgba(20,25,60,.06),0 12px 26px -18px rgba(30,40,120,.22);
+  --card-sh:none;
 }
+/* theme-heather（ridgeline）會在 body 把 --accent 設成主題紫；
+   此處奪回 App 既有語意色「錯因黃」，避免被覆蓋（深/淺分別對應原值）。 */
+/* 讓 ridgeline 元件（appbar/signature）的 --ink/--muted 跟隨本 App 的日夜切換
+   （本 App 用 data-theme，ridgeline 內建暗色是綁 data-theme-mode，不相通） */
+body.theme-heather{--accent:#eab308;--ink:var(--txt);--muted:var(--dim)}
+@media (prefers-color-scheme:light){body.theme-heather{--accent:#ca8a04}}
+:root[data-theme="light"] body.theme-heather{--accent:#ca8a04}
+:root[data-theme="dark"] body.theme-heather{--accent:#eab308}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;padding:0}
 body{
@@ -60,16 +70,12 @@ body{
   min-height:100vh;padding-bottom:78px;overscroll-behavior-y:none;
 }
 .wrap{max-width:820px;margin:0 auto;padding:0 14px}
-header.app{
-  position:sticky;top:0;z-index:40;
-  background:var(--grad);
-  padding:14px 14px calc(14px + env(safe-area-inset-top,0)) 14px;padding-top:calc(14px + env(safe-area-inset-top,0));
-  box-shadow:0 6px 20px rgba(79,70,229,.35);
-}
-header.app .inner{max-width:820px;margin:0 auto;display:flex;align-items:center;gap:10px}
-header.app h1{font-size:20px;margin:0;font-weight:800;letter-spacing:.5px;flex:1}
-header.app .sub{font-size:11px;opacity:.85;font-weight:500}
-.iconbtn{background:rgba(255,255,255,.15);border:none;color:#fff;width:38px;height:38px;border-radius:12px;font-size:18px;display:grid;place-items:center;cursor:pointer}
+/* 稜線 App Bar（頭部＝主題色 --hdr，扁平無漸層無陰影） */
+header.rl-appbar{position:sticky;top:0;z-index:40;padding:calc(14px + env(safe-area-inset-top,0)) 16px 14px;gap:12px}
+header.rl-appbar .rl-title{font-size:20px;letter-spacing:.5px}
+header.rl-appbar .rl-sub{font-size:11px;letter-spacing:0;margin-top:1px}
+header.rl-appbar .rl-glyph{width:26px;height:26px}
+.iconbtn{background:rgba(255,255,255,.15);border:none;color:var(--on);width:38px;height:38px;border-radius:12px;font-size:18px;display:grid;place-items:center;cursor:pointer}
 .iconbtn:active{transform:scale(.94)}
 
 /* 分頁 */
@@ -162,7 +168,7 @@ label.fld{display:block;font-size:12px;color:var(--dim);margin:12px 0 5px;font-w
 @keyframes spin{to{transform:rotate(360deg)}}
 .toast{position:fixed;bottom:96px;left:50%;transform:translateX(-50%);background:#000c;color:#fff;padding:11px 18px;border-radius:12px;font-size:14px;z-index:90;opacity:0;transition:.3s;pointer-events:none;max-width:90%;text-align:center}
 .toast.on{opacity:1}
-.fab{position:fixed;right:16px;bottom:calc(84px + env(safe-area-inset-bottom,0));z-index:45;background:var(--grad);color:#fff;border:none;width:58px;height:58px;border-radius:50%;font-size:28px;box-shadow:0 8px 24px rgba(99,102,241,.5);cursor:pointer;display:grid;place-items:center}
+.fab{position:fixed;right:16px;bottom:calc(84px + env(safe-area-inset-bottom,0));z-index:45;background:var(--grad);color:#fff;border:none;width:58px;height:58px;border-radius:50%;font-size:28px;cursor:pointer;display:grid;place-items:center}
 .fab:active{transform:scale(.92)}
 /* 底部橫幅出現時把 FAB 頂高，避免被蓋住 */
 body:has(.install-banner.show) .fab,body:has(.update-banner.show) .fab{bottom:calc(150px + env(safe-area-inset-bottom,0))}
@@ -217,7 +223,7 @@ body.lite *{animation:none!important;transition:none!important}
 .guide[open]>summary::after{content:"－"}
 .guide .gbody{padding:2px 14px 16px}
 .gstep{display:flex;gap:11px;padding:9px 0;border-top:1px solid var(--line)}
-.gstep .gn{flex:none;width:26px;height:26px;border-radius:8px;display:grid;place-items:center;font-size:13px;font-weight:800;color:#fff;background:linear-gradient(140deg,var(--primary),var(--primary-end))}
+.gstep .gn{flex:none;width:26px;height:26px;border-radius:8px;display:grid;place-items:center;font-size:13px;font-weight:800;color:#fff;background:var(--primary)}
 .gstep .gt{font-size:13.5px;line-height:1.6;color:var(--txt)}
 .gstep .gt b{color:var(--txt)}
 .gstep code{background:var(--card2);color:var(--primary2);padding:1px 6px;border-radius:5px;font-size:12.5px;word-break:break-all}
@@ -229,20 +235,23 @@ body.lite *{animation:none!important;transition:none!important}
 .qcard.selected{outline:2px solid var(--primary);outline-offset:-2px}
 
 /* ===== 安裝橫幅 ===== */
-.install-banner{display:none;position:fixed;left:12px;right:12px;bottom:calc(84px + env(safe-area-inset-bottom,0));z-index:47;background:var(--grad);color:#fff;border-radius:14px;padding:11px 12px;box-shadow:0 8px 24px rgba(79,70,229,.42);align-items:center;gap:10px}
+.install-banner{display:none;position:fixed;left:12px;right:12px;bottom:calc(84px + env(safe-area-inset-bottom,0));z-index:47;background:var(--grad);color:#fff;border-radius:14px;padding:11px 12px;align-items:center;gap:10px}
 .install-banner.show{display:flex}
 .install-banner .txt{flex:1;font-size:13px;line-height:1.4}
 .install-banner .txt b{font-weight:800;font-size:14px}
 .install-banner .bins{background:#fff;color:var(--primary);border:none;border-radius:10px;padding:8px 15px;font-weight:800;font-size:13.5px;cursor:pointer;white-space:nowrap}
 .install-banner .bins:active{transform:scale(.95)}
 .install-banner .bx{background:rgba(255,255,255,.22);border:none;color:#fff;width:30px;height:30px;border-radius:8px;font-size:15px;cursor:pointer;flex:none}
-.update-banner{background:linear-gradient(135deg,#16a34a,#0d9488)!important;box-shadow:0 8px 24px rgba(16,163,74,.42)!important}
+.update-banner{background:#0d9488!important}
 .update-banner .bins{color:#0d9488!important}
+/* 頁尾簽名：墊高避免被固定底部導覽列蓋住 */
+.rl-signature{margin-top:26px;padding-bottom:calc(30px + env(safe-area-inset-bottom,0) + 78px)}
+@media (min-width:900px){.rl-signature{padding-bottom:32px}}
 
 /* ===== 側邊欄（平板橫式 / 桌面）===== */
 .sidebar{display:none}
 @media (min-width:900px){
-  header.app{display:none}
+  header.rl-appbar{display:none}
   nav.tabs{display:none}
   body{padding-bottom:28px}
   .sidebar{display:flex;flex-direction:column;gap:3px;position:fixed;top:0;left:0;width:216px;height:100vh;z-index:50;background:color-mix(in srgb,var(--card) 95%,transparent);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border-right:1px solid var(--line);padding:22px 12px}
@@ -273,18 +282,17 @@ body.lite *{animation:none!important;transition:none!important}
 }
 </style>
 </head>
-<body>
+<body class="theme-heather">
 
-<header class="app">
-  <div class="inner">
-    <div style="font-size:26px">📕</div>
-    <div style="flex:1">
-      <h1>錯題管理器</h1>
-      <div class="sub">手打也行，拍照更快 · 學測全科</div>
-    </div>
-    <button class="iconbtn" onclick="openSearch()" title="搜尋">🔍</button>
-    <button class="iconbtn" onclick="go('settings')" title="設定">⚙️</button>
+<header class="rl-appbar">
+  <span class="rl-mark"><svg class="rl-glyph" width="26" height="26" viewBox="0 0 64 64" fill="none" stroke-linejoin="round" stroke-linecap="round" stroke-width="3.6"><path class="ridge" stroke="currentColor" d="M0 54 L8 48 L14 51 L22 38 L26 42 L36 14 L46 34 L61 44"/><path d="M31.3 27.2 L36 14 L38.7 19.4" stroke="#DE9A45"/></svg></span>
+  <div>
+    <div class="rl-title">錯題管理器</div>
+    <div class="rl-sub">手打也行，拍照更快 · 學測全科</div>
   </div>
+  <span class="rl-spacer"></span>
+  <button class="iconbtn" onclick="openSearch()" title="搜尋">🔍</button>
+  <button class="iconbtn" onclick="go('settings')" title="設定">⚙️</button>
 </header>
 
 <!-- 側邊欄（平板橫式/桌面顯示） -->
@@ -537,6 +545,16 @@ body.lite *{animation:none!important;transition:none!important}
     <div class="muted" style="font-size:11.5px;margin-top:8px">有新版時，App 上方會自動跳出「立即更新」提示。</div>
   </div>
 </section>
+
+<footer class="rl-signature">
+  <div class="rl-sig-row">
+    <svg viewBox="0 0 64 64" class="rl-sig-glyph" width="60" height="60" fill="none" stroke-linejoin="round" stroke-linecap="round" stroke-width="3.6"><path class="ridge" stroke="currentColor" d="M0 54 L8 48 L14 51 L22 38 L26 42 L36 14 L46 34 L61 44"/><path d="M31.3 27.2 L36 14 L38.7 19.4" stroke="#DE9A45"/></svg>
+    <span class="rl-sig-rule"></span>
+    <p class="rl-sig-quote">人生走稜，<br>高低都是風景。</p>
+  </div>
+  <p class="rl-sig-by">LUCAS 出品</p>
+  <p style="margin:14px auto 0;max-width:640px;font-size:11px;line-height:1.7;color:var(--muted);opacity:.75">© 2026 Lucas　本 App 免費提供學習使用；程式與內容著作權皆屬作者，未經同意請勿重製、散布或作商業用途。<br>⚠️ 免責聲明：本 App 之題目、分類與解析僅供學習參考，力求正確但仍可能有誤，且不代表任何官方立場；正式考試與課程請以教育部、大學入學考試中心及各校公告與教材為準。與各官方機構、出版社均無隸屬或合作關係，所引用之名稱與商標歸原權利人所有。</p>
+</footer>
 
 </div><!--/wrap-->
 
@@ -1840,7 +1858,7 @@ function applyTheme(){
   else document.documentElement.setAttribute('data-theme',t);
   // 同步狀態列顏色
   const m=document.querySelector('meta[name="theme-color"]');
-  if(m){const light=(t==='light')||(t==='auto'&&matchMedia('(prefers-color-scheme:light)').matches);m.setAttribute('content',light?'#5b56e0':'#4f46e5');}
+  if(m){m.setAttribute('content','#6B5A8C');}
 }
 function saveSettings(){
   settings.apiKey=$('setApiKey').value.trim();
@@ -2108,55 +2126,5 @@ document.addEventListener('keydown',e=>{
 document.querySelectorAll('.modal-bg').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)closeModal(m.id)}));
 init();
 </script>
-<!--RIDGELINE_BRAND_START-->
-<footer id="rdgFoot" class="rdg-foot" style="display:none">
-  <div class="rdg-lock"><svg class="rdg-mk" width="48" height="37" viewBox="0 10 62 48" aria-hidden="true"><path d="M0 54 L8 48 L14 51 L22 38 L26 42 L36 14 L46 34 L61 44" fill="none" stroke="currentColor" stroke-width="3.6" stroke-linejoin="round" stroke-linecap="round"/><path d="M31.3 27.2 L36 14 L38.7 19.4" fill="none" stroke="#DE9A45" stroke-width="3.6" stroke-linejoin="round" stroke-linecap="round"/></svg><span class="rdg-slg">人生走稜，<br>高低都是風景。</span></div>
-  <div class="rdg-by">LUCAS 出品</div>
-  <div class="rdg-lic">© 2026 Lucas　本 App 免費提供學習使用；程式與內容著作權皆屬作者，未經同意請勿重製、散布或作商業用途。</div>
-  <div class="rdg-l3">⚠️ 免責聲明：本站各 App 之單字、例句、題目與解析僅供學習參考，力求正確但仍可能有誤，且不代表任何官方立場；正式考試與課程請以教育部、大學入學考試中心及各校公告與教材為準。與各官方機構、出版社均無隸屬或合作關係，所引用之名稱與商標歸原權利人所有。</div>
-</footer>
-<style>
-.rdg-foot{display:block;box-sizing:border-box;width:100%;clear:both;text-align:center;color:inherit;
-  margin-top:30px;padding:22px 18px calc(env(safe-area-inset-bottom,0px) + 74px);
-  border-top:1px solid rgba(130,130,130,.22);line-height:1.7;
-  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif}
-.rdg-foot .rdg-lock{display:inline-flex;align-items:center;justify-content:center;gap:14px;margin-bottom:13px}
-.rdg-foot .rdg-mk{flex-shrink:0;display:block;width:54px;height:auto}
-.rdg-foot .rdg-slg{border-left:1px solid rgba(130,130,130,.35);padding-left:14px;text-align:left;
-  font-size:15px;letter-spacing:2px;line-height:1.5;opacity:.82}
-.rdg-foot .rdg-by{font-size:12.5px;letter-spacing:2px;opacity:.6;margin-bottom:6px}
-.rdg-foot .rdg-lic{font-size:11px;opacity:.5;max-width:640px;margin:0 auto 10px;line-height:1.7}
-.rdg-foot .rdg-l3{font-size:11px;opacity:.52;max-width:640px;margin:0 auto;text-align:justify}
-</style>
-<script>
-(function(){
-  function mount(){
-    var f=document.getElementById('rdgFoot'); if(!f) return;
-    // 錯題管理器：優先掛在主內容 .wrap（避免被塞進 Modal 捲動區）
-    var app=document.getElementById('app')||document.querySelector('.wrap');
-    var target=null;
-    if(app){ var s=getComputedStyle(app); if(s.overflowY==='visible'||s.overflowY==='') target=app; }
-    if(!target){
-      var best=null,area=0,els=document.body.getElementsByTagName('*');
-      for(var i=0;i<els.length;i++){ var el=els[i];
-        if(el===f||el.contains(f)) continue;
-        var st=getComputedStyle(el);
-        if(st.overflowY==='auto'||st.overflowY==='scroll'){
-          var r=el.getBoundingClientRect();
-          if(r.height>200&&r.width>140&&r.top<innerHeight&&r.bottom>0){
-            var a=r.width*r.height; if(a>area){area=a;best=el;}
-          }
-        }
-      }
-      target=best||app||document.body;
-    }
-    try{ target.appendChild(f); }catch(e){ document.body.appendChild(f); }
-    f.style.display='block';
-  }
-  if(document.readyState==='complete') setTimeout(mount,300);
-  else window.addEventListener('load',function(){setTimeout(mount,300);});
-})();
-</script>
-<!--RIDGELINE_BRAND_END-->
 </body>
 </html>
