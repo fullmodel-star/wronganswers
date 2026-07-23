@@ -37,7 +37,8 @@
 .theme-indigo {--hdr:#35508C;--on:#EEF3F6;--accent:#4A68A8;--tint:#E4E8F2;} /* 靛藍 商務 */
 .theme-teal   {--hdr:#2C8C8C;--on:#EEF3F6;--accent:#3CA6A6;--tint:#E2F0F0;} /* 湖青 健康 */
 .theme-clay   {--hdr:#B36A3E;--on:#EEF3F6;--accent:#C77E4E;--tint:#F3E7DD;} /* 陶赭 文化 */
-.theme-heather{--hdr:#6B5A8C;--on:#EEF3F6;--accent:#8672A8;--tint:#ECE7F2;} /* 霧紫 學習・錯題 */
+.theme-denali{--hdr:#4E6A7C;--on:#EEF3F6;--accent:#4E6A7C;--tint:#E4E9EC;} /* v4 凜峰藍 第納利／學習與精進 */
+.theme-heather{--hdr:#4E6A7C;--on:#EEF3F6;--accent:#4E6A7C;--tint:#E4E9EC;} /* v4 對齊：舊霧紫改用第納利凜峰藍 */
 /* 淺色頭部（深文字與標記） */
 .theme-sky    {--hdr:#E6F1FB;--on:#173A5A;--accent:#2E7BC4;--tint:#D6E7F6;} /* 晴空 單字 */
 .theme-grass  {--hdr:#E9F3E0;--on:#2C4A20;--accent:#4C9A3F;--tint:#DCEBCF;} /* 草綠 會話・生活 */
