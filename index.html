@@ -251,12 +251,11 @@ body.lite *{animation:none!important;transition:none!important}
 /* ===== 側邊欄（平板橫式 / 桌面）===== */
 .sidebar{display:none}
 @media (min-width:900px){
-  header.rl-appbar{display:none}
+  header.rl-appbar{margin-left:216px}
   nav.tabs{display:none}
   body{padding-bottom:28px}
   .sidebar{display:flex;flex-direction:column;gap:3px;position:fixed;top:0;left:0;width:216px;height:100vh;z-index:50;background:color-mix(in srgb,var(--card) 95%,transparent);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border-right:1px solid var(--line);padding:22px 12px}
-  .sidebar .sb-logo{display:flex;align-items:center;gap:9px;font-size:18px;font-weight:800;padding:6px 12px 20px}
-  .sidebar .sb-logo .em{font-size:24px}
+  .sidebar .sb-ttl{font-weight:800;font-size:14px;letter-spacing:1px;color:var(--dim);padding:6px 12px 18px}
   .sidebar button{display:flex;align-items:center;gap:12px;width:100%;text-align:left;background:none;border:none;color:var(--dim);font-size:15px;font-weight:600;padding:12px 14px;border-radius:12px;cursor:pointer;font-family:inherit}
   .sidebar button .i{font-size:19px;width:22px;text-align:center}
   .sidebar button:hover{background:var(--card2);color:var(--txt)}
@@ -298,7 +297,7 @@ body.lite *{animation:none!important;transition:none!important}
 
 <!-- 側邊欄（平板橫式/桌面顯示） -->
 <aside class="sidebar">
-  <div class="sb-logo"><span class="em">📕</span>錯題管理器</div>
+  <div class="sb-ttl">錯題管理器</div>
   <button class="on" data-p="list" onclick="go('list')"><span class="i">📚</span>錯題本</button>
   <button data-p="review" onclick="go('review')"><span class="i">🔥</span>複習</button>
   <button data-p="stats" onclick="go('stats')"><span class="i">📊</span>統計</button>

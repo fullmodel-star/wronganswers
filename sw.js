@@ -1,4 +1,4 @@
-const CACHE='cuoti-v22';
+const CACHE='cuoti-v23';
 const ASSETS=['./','./index.html','./manifest.webmanifest','./ridgeline-ui.css','./favicon.svg','./icon.svg','./icon-180.png','./icon-192.png','./icon-512.png'];
 self.addEventListener('install',e=>{
   // 不自動 skipWaiting：讓新版進入「等待」，由 App 詢問使用者後再接管
