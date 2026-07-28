@@ -18,11 +18,11 @@
 <link rel="stylesheet" href="ridgeline-ui.css">
 <style>
 :root{
-  /* 淺色（預設）· 稜線遠山 theme-slate，跟旅遊工具箱同一套 */
+  /* 淺色（預設）· 稜線 theme-denali（本App官方所屬家族:學習與精進),沿用旅遊工具箱的版面手法但改回自己家族的凜峰藍 */
   --bg:#F7F3EC; --bg2:#EFE9DD; --card:#FFFFFF; --card2:#F4EFE6;
   --line:#E4DDCE; --txt:#141E2B; --dim:#6E8BA3;
-  --primary:#3E7A88; --primary2:#4E92A2; --primary-strong:#3E7A88; --primary-end:#3E7A88;
-  --grad:#4E92A2;
+  --primary:#4E6A7C; --primary2:#6C8CA0; --primary-strong:#4E6A7C; --primary-end:#4E6A7C;
+  --grad:#6C8CA0;
   --ok:#16a34a; --warn:#d97706; --bad:#dc2626; --accent:#ca8a04;
   --card-sh:none;
   --radius:16px; --r-pill:20px; --r-card:16px; --r-ctrl:12px; --r-tag:8px;
@@ -33,35 +33,35 @@
 @media (prefers-color-scheme:dark){:root{
   --bg:#141E2B; --bg2:#1B2838; --card:#1B2838; --card2:#243447;
   --line:#2A3A4E; --txt:#EEF3F6; --dim:#8b96a8;
-  --primary:#3E7A88; --primary2:#6DB3C2; --primary-strong:#3E7A88; --primary-end:#3E7A88;
-  --grad:#4E92A2;
+  --primary:#4E6A7C; --primary2:#8CA6B8; --primary-strong:#4E6A7C; --primary-end:#4E6A7C;
+  --grad:#8CA6B8;
   --ok:#22c55e; --warn:#f59e0b; --bad:#ef4444; --accent:#eab308;
   --card-sh:none;
 }}
 :root[data-theme="dark"]{
   --bg:#141E2B; --bg2:#1B2838; --card:#1B2838; --card2:#243447;
   --line:#2A3A4E; --txt:#EEF3F6; --dim:#8b96a8;
-  --primary:#3E7A88; --primary2:#6DB3C2; --primary-strong:#3E7A88; --primary-end:#3E7A88;
-  --grad:#4E92A2;
+  --primary:#4E6A7C; --primary2:#8CA6B8; --primary-strong:#4E6A7C; --primary-end:#4E6A7C;
+  --grad:#8CA6B8;
   --ok:#22c55e; --warn:#f59e0b; --bad:#ef4444; --accent:#eab308;
   --card-sh:none;
 }
 :root[data-theme="light"]{
   --bg:#F7F3EC; --bg2:#EFE9DD; --card:#FFFFFF; --card2:#F4EFE6;
   --line:#E4DDCE; --txt:#141E2B; --dim:#6E8BA3;
-  --primary:#3E7A88; --primary2:#4E92A2; --primary-strong:#3E7A88; --primary-end:#3E7A88;
-  --grad:#4E92A2;
+  --primary:#4E6A7C; --primary2:#6C8CA0; --primary-strong:#4E6A7C; --primary-end:#4E6A7C;
+  --grad:#6C8CA0;
   --ok:#16a34a; --warn:#d97706; --bad:#dc2626; --accent:#ca8a04;
   --card-sh:none;
 }
-/* theme-slate（ridgeline）會在 body 把 --accent 設成主題藍綠；
+/* theme-denali（ridgeline）會在 body 把 --accent 設成主題色；
    此處奪回 App 既有語意色「錯因黃」，避免被覆蓋（深/淺分別對應原值）。 */
 /* 讓 ridgeline 元件（appbar/signature）的 --ink/--muted 跟隨本 App 的日夜切換
    （本 App 用 data-theme，ridgeline 內建暗色是綁 data-theme-mode，不相通） */
-body.theme-slate{--accent:#ca8a04;--ink:var(--txt);--muted:var(--dim)}
-@media (prefers-color-scheme:dark){body.theme-slate{--accent:#eab308}}
-:root[data-theme="light"] body.theme-slate{--accent:#ca8a04}
-:root[data-theme="dark"] body.theme-slate{--accent:#eab308}
+body.theme-denali{--accent:#ca8a04;--ink:var(--txt);--muted:var(--dim)}
+@media (prefers-color-scheme:dark){body.theme-denali{--accent:#eab308}}
+:root[data-theme="light"] body.theme-denali{--accent:#ca8a04}
+:root[data-theme="dark"] body.theme-denali{--accent:#eab308}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;padding:0}
 body{
@@ -282,7 +282,7 @@ body.lite *{animation:none!important;transition:none!important}
 
 </style>
 </head>
-<body class="theme-slate">
+<body class="theme-denali">
 
 <header class="rl-appbar">
   <span class="rl-mark"><img class="rl-glyph" src="rl-mark-denali-white.png" width="30" height="30" alt="" style="object-fit:contain"></span>
@@ -546,7 +546,7 @@ body.lite *{animation:none!important;transition:none!important}
   </div>
 </section>
 
-<footer class="rl-signature">
+<footer class="rl-signature theme-denali">
   <div class="rl-sig-row">
     <span class="rl-mkcol" style="display:inline-flex;flex-direction:column;align-items:center;gap:3px"><img class="rl-sig-glyph" src="rl-mark-denali-navy.png" width="66" height="34" alt="" style="object-fit:contain"><span style="font-family:'Noto Serif TC',serif;font-size:14px;font-weight:600;letter-spacing:.5px;color:currentColor">Denali</span><span style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:2px;color:#8794a3">6,190 M</span></span>
     <span class="rl-sig-rule" style="height:88px"></span>
