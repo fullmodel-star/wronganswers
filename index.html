@@ -743,7 +743,7 @@ body.lite *{animation:none!important;transition:none!important}
 <div id="printArea"></div>
 
 <!-- 圖片燈箱（頁內放大預覽，PWA standalone 相容） -->
-<div id="imgLightbox" onclick="closeLightbox()"><img id="imgLightboxImg" src=""></div>
+<div id="imgLightbox" onclick="closeLightbox()"><img id="imgLightboxImg" alt="錯題圖片放大檢視"></div>
 
 <!-- ============ AI 變式題 Modal ============ -->
 <div class="modal-bg" id="varModal">
@@ -2127,7 +2127,7 @@ async function init(){
 }
 
 /* ================= 版本更新機制 ================= */
-const APP_VERSION='14（2026-09-29 UI/UX 全面修正）';
+const APP_VERSION='14.1（2026-10-01 稽核小修）';
 let swReg=null, swRefreshing=false;
 function showUpdateBanner(){$('updateBanner').classList.add('show')}
 function registerSW(){
