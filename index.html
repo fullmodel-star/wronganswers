@@ -219,9 +219,21 @@ body.lite *{animation:none!important;transition:none!important}
   #printArea .pq .qn{font-weight:700;font-size:12px;color:#666!important}
   #printArea .pq .qt{white-space:pre-wrap;margin:3px 0;font-size:13px}
   #printArea .pq img{max-width:80mm;max-height:60mm;display:block;margin:5px 0}
+  #printArea .qpassage{white-space:pre-wrap;margin:4px 0 6px;font-size:12px;border-left:2px solid #555;padding-left:8px;color:#333!important}
   #printArea .pans{font-size:12.5px;margin-top:5px}
   #printArea .pans b{color:#000!important}
   #printArea .pexp{font-size:12px;color:#333!important;white-space:pre-wrap;margin-top:3px}
+  #printArea .math{font-family:"Cambria Math","Latin Modern Math","Times New Roman",serif}
+  #printArea .math .frac{display:inline-flex;flex-direction:column;text-align:center;vertical-align:middle;font-size:.88em;line-height:1.05;margin:0 .1em}
+  #printArea .math .frac .num{border-bottom:1.4px solid #000;padding:0 .35em}
+  #printArea .math .frac .den{padding:0 .35em}
+  #printArea .math .sqrt .rad{border-top:1.4px solid #000;padding:0 .12em;margin-left:-.05em}
+  #printArea .math sub,#printArea .math sup{font-size:.72em}
+  #printArea .math .vec{position:relative;white-space:nowrap}
+  #printArea .math .vec::after{content:"→";position:absolute;left:0;right:0;top:-.85em;font-size:.7em;text-align:center}
+  #printArea .math .hat{position:relative}
+  #printArea .math .hat::after{content:"^";position:absolute;left:0;right:0;top:-.7em;text-align:center;font-size:.8em}
+  #printArea .math .oline{border-top:1.3px solid #000;padding-top:1px}
 }
 /* 圖片燈箱 */
 #imgLightbox{display:none;position:fixed;inset:0;z-index:999;background:rgba(0,0,0,.92);align-items:center;justify-content:center;padding:20px;box-sizing:border-box}
@@ -1097,7 +1109,7 @@ function openEdit(id){
   closeModal('viewModal');openModal('addModal');markAddClean();
 }
 
-let photoSeq=0; // 每次選圖/清除 +1，舊照片的非同步壓縮回來時若序號不符就丟棄
+let photoSeq=0, photoCompressing=null; // 每次選圖/清除 +1，舊照片的非同步壓縮回來時若序號不符就丟棄
 function onPhoto(file){
   if(!file)return;
   const seq=++photoSeq;
@@ -1110,36 +1122,44 @@ function onPhoto(file){
     pendingMime=(file.type&&file.type.indexOf('image/')===0)?file.type:'image/jpeg';
     pendingImg=raw;
     showPreview(raw);
-    // 金鑰已設 → 待壓縮處理完畢（成功或失敗）才自動辨識，避免抓到壓縮前的大圖
     const autoRecognize=()=>{if(settings.apiKey&&!editingId&&pendingImg&&$('addModal').classList.contains('on'))recognize();};
     // 背景嘗試壓縮，成功才取代（HEIC 等無法解碼時保留原圖）
-    const img=new Image();
-    img.onload=()=>{
-      if(seq!==photoSeq)return;
-      try{
-        const max=1280,scale=Math.min(1,max/Math.max(img.width,img.height));
-        if(scale<1||pendingMime!=='image/jpeg'){
-          const cv=document.createElement('canvas');
-          cv.width=Math.max(1,Math.round(img.width*scale));
-          cv.height=Math.max(1,Math.round(img.height*scale));
-          cv.getContext('2d').drawImage(img,0,0,cv.width,cv.height);
-          const out=cv.toDataURL('image/jpeg',0.82);
-          if(out&&out.length>100){pendingImg=out;pendingMime='image/jpeg';showPreview(out);}
-        }
-      }catch(err){/* 壓縮失敗：保留原圖 */console.warn('compress failed',err)}
-      autoRecognize();
-    };
-    img.onerror=()=>{/* 無法解碼(如HEIC)：直接用原圖，Gemini 支援 HEIC */if(seq===photoSeq)autoRecognize()};
-    img.src=raw;
+    const p=new Promise(res=>{
+      const img=new Image();
+      img.onload=()=>{
+        if(seq!==photoSeq){res();return;}
+        try{
+          const max=1280,scale=Math.min(1,max/Math.max(img.width,img.height));
+          if(scale<1||pendingMime!=='image/jpeg'){
+            const cv=document.createElement('canvas');
+            cv.width=Math.max(1,Math.round(img.width*scale));
+            cv.height=Math.max(1,Math.round(img.height*scale));
+            cv.getContext('2d').drawImage(img,0,0,cv.width,cv.height);
+            const out=cv.toDataURL('image/jpeg',0.82);
+            if(out&&out.length>100){pendingImg=out;pendingMime='image/jpeg';showPreview(out);}
+          }
+        }catch(err){/* 壓縮失敗：保留原圖 */console.warn('compress failed',err)}
+        res();
+      };
+      img.onerror=()=>{/* 無法解碼(如HEIC)：直接用原圖，Gemini 支援 HEIC */res()};
+      img.src=raw;
+    });
+    photoCompressing=p;
+    p.then(()=>{if(seq===photoSeq)autoRecognize()});
   };
   reader.readAsDataURL(file);
 }
 function showPreview(src){$('prevImg').src=src;$('photoEmpty').style.display='none';$('photoPreview').style.display='block';$('recogStatus').textContent=''}
-function clearPhoto(){photoSeq++;pendingImg=null;pendingMime='image/jpeg';$('photoEmpty').style.display='block';$('photoPreview').style.display='none';$('camIn').value='';$('galIn').value=''}
+function clearPhoto(){photoSeq++;photoCompressing=null;pendingImg=null;pendingMime='image/jpeg';$('photoEmpty').style.display='block';$('photoPreview').style.display='none';$('camIn').value='';$('galIn').value=''}
 
 /* ============ Gemini 辨識 ============ */
 async function recognize(){
   if(!pendingImg){toast('請先選擇照片');return}
+  if(photoCompressing){
+    const b=$('recogBtn');if(b)b.disabled=true;
+    $('recogStatus').innerHTML='<span class="spinner"></span> 圖片處理中…';
+    await photoCompressing;
+  }
   if(!settings.apiKey){
     // 不清空、不踢人：當場提示，照片與已填內容都保留
     $('recogStatus').innerHTML='<span style="color:var(--warn)">拍照辨識需要一組免費金鑰（一次性設定）。</span><br>'+
@@ -1458,7 +1478,7 @@ function mockShow(){
   const q=mockQueue[mockIdx];
   $('mockBody').innerHTML=`<div class="grabber"></div>
     <div style="display:flex;align-items:center;margin-bottom:8px"><b>第 ${mockIdx+1}/${mockQueue.length} 題</b><span style="flex:1"></span><span class="pill" style="color:var(--bad)">⏱ <span id="mockClock">–</span></span></div>
-    ${imgURL(q)?`<img src="${esc(imgURL(q))}" style="width:100%;border-radius:10px;margin-bottom:8px;background:#0008">`:''}
+    ${imgURL(q)?`<img src="${esc(imgURL(q))}" style="width:100%;border-radius:10px;margin-bottom:8px;background:#0008;cursor:zoom-in" onclick="openLightbox(this.src)" title="點擊放大圖片">`:''}
     <div class="card" style="background:var(--card2)"><div style="line-height:1.7;white-space:pre-wrap">${mathRender(q.question)||'（僅照片）'}</div></div>
     <label class="fld">你的作答</label>
     <textarea id="mockInput" placeholder="寫下答案">${esc(mockAns[mockIdx]||'')}</textarea>
@@ -1533,7 +1553,7 @@ function viewQ(id){
       ${q.leech?'<span class="tag" style="color:var(--bad)">🔴 頑固</span>':''}
       ${q.retired?'<span class="mastered-badge">🏆 完全精熟</span>':(q.mastered?'<span class="mastered-badge">✓ 精熟</span>':'')}
     </div>
-    ${imgURL(q)?`<img src="${esc(imgURL(q))}" style="width:100%;border-radius:12px;margin-bottom:12px;background:#0008" onclick="openLightbox(this.src)">`:''}
+    ${imgURL(q)?`<img src="${esc(imgURL(q))}" style="width:100%;border-radius:12px;margin-bottom:12px;background:#0008;cursor:zoom-in" onclick="openLightbox(this.src)" title="點擊放大圖片">`:''}
     ${q.passage?`<div class="card" style="background:var(--card2)"><b>📄 文章</b><div style="margin-top:6px;line-height:1.7;white-space:pre-wrap">${mathRender(q.passage)}</div></div>`:''}
     ${q.question?`<div class="card" style="background:var(--card2)"><b>📝 題目</b><div style="margin-top:6px;line-height:1.7;white-space:pre-wrap">${mathRender(q.question)}</div></div>`:''}
     <div class="row">
@@ -1709,7 +1729,7 @@ function showReviewCard(){
     <div class="card" style="text-align:center;padding:8px 10px"><span class="muted">第 ${reviewIdx+1} / ${reviewQueue.length} 題 · ${esc(q.subject)}${q.chapter?' · '+esc(q.chapter):''}${q.mastered?' · 🎓維持':''}${q.leech?' · 🔴頑固':''}</span>${settings.timer?` <span id="revTimer" class="muted">⏱ 0s</span>`:''}</div>
     ${q.passage?`<div class="card" style="background:var(--card2)"><div class="muted" style="font-size:12px">📄 文章</div><div style="margin-top:4px;line-height:1.7;white-space:pre-wrap;max-height:200px;overflow:auto">${mathRender(q.passage)}</div></div>`:''}
     <div class="card qcard s-${esc(q.subject)}" style="--sc:var(--s-${subjClass(q.subject)})">
-      ${imgURL(q)?`<img src="${esc(imgURL(q))}" style="width:100%;border-radius:10px;margin-bottom:10px;background:#0008">`:''}
+      ${imgURL(q)?`<img src="${esc(imgURL(q))}" style="width:100%;border-radius:10px;margin-bottom:10px;background:#0008;cursor:zoom-in" onclick="openLightbox(this.src)" title="點擊放大圖片">`:''}
       ${q.question?`<div style="line-height:1.7;white-space:pre-wrap">${mathRender(q.question)}</div>`:''}
     </div>
     ${revealed?`
@@ -1859,7 +1879,7 @@ function normText(s){return (s||'').toLowerCase()
 function doSearch(){
   const k=normText($('searchInput').value.trim());
   if(!k){$('searchResults').innerHTML='';return}
-  const res=DATA.filter(q=>normText([q.question,q.explain,q.chapter,(q.topics||[]).join(' '),q.source,q.subject,q.type,q.ans,q.myAns,q.cause].join(' ')).includes(k));
+  const res=DATA.filter(q=>normText([q.question,q.explain,q.chapter,(q.topics||[]).join(' '),q.passage,q.source,q.subject,q.type,q.ans,q.myAns,q.cause,(q.causes||[]).join(' ')].join(' ')).includes(k));
   $('searchResults').innerHTML=res.length?
     `<div class="muted" style="margin-bottom:8px">找到 ${res.length} 題${res.length>80?'（顯示前 80）':''}</div>`+res.slice(0,80).map(qcardHTML).join('')
     :'<div class="empty" style="padding:30px"><div class="big">🔍</div>找不到「'+esc($('searchInput').value.trim())+'」</div>';
@@ -2010,6 +2030,7 @@ function printBook(hideAns){
     groups[k].forEach(q=>{
       n++;
       html+=`<div class="pq"><div class="qn">第 ${n} 題　${esc(q.type||'')}　難度${esc(q.diff||'中')}</div>`;
+      if(q.passage)html+=`<div class="qpassage"><b>📄 閱讀文章：</b><br>${mathRender(q.passage)}</div>`;
       if(q.question)html+=`<div class="qt">${mathRender(q.question)}</div>`;
       const u=imgURL(q);if(u)html+=`<img src="${esc(u)}">`;
       if(!hideAns){
@@ -2127,7 +2148,7 @@ async function init(){
 }
 
 /* ================= 版本更新機制 ================= */
-const APP_VERSION='14.1（2026-10-01 稽核小修）';
+const APP_VERSION='14.2（2026-10-02 完善列印公式/搜尋多標籤與錯因/拍照壓縮雙重防競爭/全流程燈箱）';
 let swReg=null, swRefreshing=false;
 function showUpdateBanner(){$('updateBanner').classList.add('show')}
 function registerSW(){
