@@ -24,7 +24,7 @@
   --primary:#4E6A7C; --primary2:#6C8CA0; --primary-strong:#4E6A7C; --primary-end:#4E6A7C;
   --grad:#6C8CA0;
   --ok:#16a34a; --warn:#d97706; --bad:#dc2626; --accent:#ca8a04;
-  --card-sh:none;
+  --card-sh:0 2px 8px rgba(20,30,43,0.035);
   --radius:16px; --r-pill:20px; --r-card:16px; --r-ctrl:12px; --r-tag:8px;
   /* 科目色（刻意避開 對錯紅綠、主色藍綠、錯因accent） */
   --s-chi:#fb7185; --s-eng:#38bdf8; --s-math:#c084fc; --s-sci:#2dd4bf; --s-soc:#fbbf24; --s-other:#94a3b8;
@@ -52,7 +52,7 @@
   --primary:#4E6A7C; --primary2:#6C8CA0; --primary-strong:#4E6A7C; --primary-end:#4E6A7C;
   --grad:#6C8CA0;
   --ok:#16a34a; --warn:#d97706; --bad:#dc2626; --accent:#ca8a04;
-  --card-sh:none;
+  --card-sh:0 2px 8px rgba(20,30,43,0.035);
 }
 /* theme-denali（ridgeline）會在 body 把 --accent 設成主題色；
    此處奪回 App 既有語意色「錯因黃」，避免被覆蓋（深/淺分別對應原值）。 */
@@ -105,24 +105,25 @@ section.page.on{display:block;animation:fade .25s}
 .card .card{background:var(--card2);box-shadow:none}
 /* 數字等寬對齊 */
 .stat .n,.bar-row .val,.num{font-variant-numeric:tabular-nums}
-.btn{background:var(--primary);color:#fff;border:none;border-radius:12px;padding:12px 16px;font-size:15px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:7px;justify-content:center}
+.btn{background:var(--primary);color:#fff;border:none;border-radius:12px;padding:12px 16px;font-size:15px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:7px;justify-content:center;transition:background .15s,transform .1s,box-shadow .15s}
 .btn:active{transform:scale(.97)}
 .btn.full{width:100%}
 .btn.ghost{background:var(--card2);color:var(--txt);border:1px solid var(--line)}
+@media (hover:hover){.btn.ghost:hover{background:var(--bg2)}}
 .btn.sm{padding:8px 12px;font-size:13px;border-radius:10px}
 .btn.bad{background:var(--bad)} .btn.ok{background:var(--ok)}
 .btn:disabled{opacity:.5;cursor:not-allowed}
 input,select,textarea{
-  width:100%;background:var(--bg2);border:1px solid var(--line);border-radius:11px;
-  color:var(--txt);padding:11px 12px;font-size:15px;font-family:inherit;outline:none;
+  width:100%;background:var(--bg2);border:1px solid var(--line);border-radius:12px;
+  color:var(--txt);padding:11px 12px;font-size:15px;font-family:inherit;outline:none;transition:border-color .15s,box-shadow .15s;
 }
-input:focus,select:focus,textarea:focus{border-color:var(--primary2)}
+input:focus,select:focus,textarea:focus{border-color:var(--primary2);box-shadow:0 0 0 3px color-mix(in srgb,var(--primary2) 18%,transparent)}
 textarea{resize:vertical;min-height:70px;line-height:1.6}
 label.fld{display:block;font-size:12px;color:var(--dim);margin:12px 0 5px;font-weight:600}
 .row{display:flex;gap:8px}.row>*{flex:1;min-width:0}
 .pill{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:999px;font-size:12px;font-weight:700;background:var(--card2);border:1px solid var(--line)}
 .chips{display:flex;flex-wrap:wrap;gap:7px}
-.chip{padding:7px 13px;border-radius:999px;font-size:13px;font-weight:600;background:var(--card2);border:1px solid var(--line);color:var(--dim);cursor:pointer}
+.chip{padding:7px 13px;border-radius:999px;font-size:13px;font-weight:600;background:var(--card2);border:1px solid var(--line);color:var(--dim);cursor:pointer;transition:background .15s,color .15s,border-color .15s}
 .chip.on{background:var(--primary);color:#fff;border-color:var(--primary)}
 .muted{color:var(--dim);font-size:13px}
 .hr{height:1px;background:var(--line);margin:14px 0;border:0}
@@ -134,7 +135,10 @@ label.fld{display:block;font-size:12px;color:var(--dim);margin:12px 0 5px;font-w
 .s-歷史{--sc:var(--s-his)}.s-地理{--sc:var(--s-geo)}.s-公民{--sc:var(--s-civ)}
 
 /* 題目卡 */
-.qcard{position:relative;overflow:hidden;padding-left:16px}
+.qcard{position:relative;overflow:hidden;padding-left:16px;transition:border-color .18s,box-shadow .18s,transform .18s}
+@media (hover:hover){
+  .qcard:hover{border-color:color-mix(in srgb,var(--primary) 35%,var(--line));box-shadow:0 4px 14px rgba(20,30,43,.06)}
+}
 .qcard::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:var(--sc,var(--s-other))}
 .qcard .top{display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap}
 .qcard .tag,#viewBody .tag{font-size:11px;padding:2px 8px;border-radius:8px;background:var(--card2);color:var(--dim);font-weight:600}
@@ -147,7 +151,7 @@ label.fld{display:block;font-size:12px;color:var(--dim);margin:12px 0 5px;font-w
 
 /* 統計 */
 .stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
-.stat{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 10px;text-align:center}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 10px;text-align:center;box-shadow:var(--card-sh)}
 .stat .n{font-size:26px;font-weight:800;line-height:1}
 .stat .l{font-size:11px;color:var(--dim);margin-top:5px}
 .bar-row{display:flex;align-items:center;gap:9px;margin:8px 0}
@@ -166,7 +170,9 @@ label.fld{display:block;font-size:12px;color:var(--dim);margin:12px 0 5px;font-w
 .grabber{width:40px;height:4px;background:var(--line);border-radius:2px;margin:0 auto 12px}
 
 .empty{text-align:center;padding:50px 20px;color:var(--dim)}
+.empty .empty-icon{width:64px;height:64px;border-radius:20px;background:var(--card2);border:1px solid var(--line);display:grid;place-items:center;margin:0 auto 14px;color:var(--primary2)}
 .empty .big{font-size:52px;margin-bottom:10px}
+.reveal-box{animation:fade .22s ease}
 .spinner{width:20px;height:20px;border:3px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;display:inline-block}
 @keyframes spin{to{transform:rotate(360deg)}}
 .toast{position:fixed;bottom:96px;left:50%;transform:translateX(-50%);background:#000c;color:#fff;padding:11px 18px;border-radius:12px;font-size:14px;z-index:90;opacity:0;transition:.3s;pointer-events:none;max-width:90%;text-align:center}
@@ -1513,7 +1519,7 @@ async function batchStar(){const qs=selectedQs();if(!qs.length){toast('請先選
 async function batchDelete(){const qs=selectedQs();if(!qs.length){toast('請先選題');return}if(!confirm('確定刪除選取的 '+qs.length+' 題？無法復原'))return;for(const q of qs){try{await dbDel(q.id)}catch(e){}dropURL(q.id);}const del=new Set(qs.map(q=>q.id));DATA=DATA.filter(q=>!del.has(q.id));selectedIds.clear();renderList();renderBatchBar();initFilters();toast('已刪除 '+qs.length+' 題');}
 async function batchRetag(){const qs=selectedQs();if(!qs.length){toast('請先選題');return}const t=prompt('把選取的 '+qs.length+' 題主題改成（設為主標籤）：');if(t==null)return;const nt=t.trim();if(!nt)return;for(const q of qs){q.chapter=nt;q.topics=[nt].concat((q.topics||[]).filter(x=>x!==nt));q.updatedAt=Date.now();try{await dbPut(q)}catch(e){}}initFilters();renderList();renderBatchBar();toast('已改主題為「'+nt+'」（'+qs.length+' 題）');}
 function setView(v){listView=v;document.querySelectorAll('#viewSeg button').forEach(b=>b.classList.toggle('on',b.dataset.v===v));renderList()}
-function emptyHTML(t,s){return `<div class="empty"><div class="big">📭</div><div style="font-size:16px;font-weight:700;color:var(--txt)">${t}</div><div style="margin-top:6px">${s}</div></div>`}
+function emptyHTML(t,s){return `<div class="empty"><div class="empty-icon"><svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"/><path d="M6 6h10"/><path d="M6 10h7"/><path d="m9 16 2 2 4-4"/></svg></div><div style="font-size:16px;font-weight:700;color:var(--txt)">${t}</div><div style="margin-top:6px;font-size:13px">${s}</div></div>`}
 
 function qcardHTML(q,inGroup){
   const st=statusOf(q);
@@ -1638,12 +1644,13 @@ function showVariation(){
   $('varBody').innerHTML=`<div class="grabber"></div>
     <h2>🔄 類似題（${esc(q.subject)}${q.chapter?'·'+esc(q.chapter):''}）</h2>
     <div class="card" style="background:var(--card2)"><div style="line-height:1.7;white-space:pre-wrap">${mathRender(o.question||'')}</div></div>
-    ${revealed?`
+    ${revealed?`<div class="reveal-box">
       ${myWrite?`<div class="card" style="background:var(--card2)"><div class="muted" style="font-size:12px">✍️ 你剛寫的　${matched===true?'<span class="correct">✓ 一致</span>':(matched===false?'<span class="wrong">✗ 不同</span>':'')}</div><div style="white-space:pre-wrap;margin-top:3px">${mathRender(myWrite)}</div></div>`:''}
       <div class="card" style="background:color-mix(in srgb,var(--primary) 12%,var(--bg))"><div class="muted" style="font-size:12px">正確答案</div><div class="correct" style="font-size:18px">${mathRender(o.ans||'')}</div>
       ${o.explain?`<div class="hr"></div><b>💡 詳解</b><div style="margin-top:4px;line-height:1.7;white-space:pre-wrap">${mathRender(o.explain)}</div>`:''}
       <div class="muted" style="margin-top:8px;font-size:11.5px">⚠️ AI 生成題目與解析僅供練習，請對照課本確認</div></div>
-      <div class="row"><button class="btn ghost" onclick="genVariation('${esc(varData.srcId)}')">🔄 再一題</button><button class="btn ghost" onclick="genVariation('${esc(varData.srcId)}',true)">⚡ 加深一題</button><button class="btn" onclick="closeModal('varModal')">完成</button></div>`:`
+      <div class="row"><button class="btn ghost" onclick="genVariation('${esc(varData.srcId)}')">🔄 再一題</button><button class="btn ghost" onclick="genVariation('${esc(varData.srcId)}',true)">⚡ 加深一題</button><button class="btn" onclick="closeModal('varModal')">完成</button></div>
+    </div>`:`
       <label class="fld" style="color:var(--primary2)">✍️ 先自己作答</label>
       <textarea id="varWrite" placeholder="寫下你的答案再看解答">${esc(myWrite||'')}</textarea>
       <div class="row" style="margin-top:8px"><button class="btn ghost" onclick="closeModal('varModal')">關閉</button><button class="btn" onclick="varReveal()">👀 顯示答案</button></div>`}
@@ -1716,7 +1723,7 @@ function showReviewCard(){
   if(!reviewQueue.length){
     const upcoming=DATA.filter(q=>!q.mastered&&!q.retired).length;
     const dueMore=DATA.filter(dueForReview).length;
-    area.innerHTML=reviewHeader()+`<div class="empty"><div class="big">🎉</div>
+    area.innerHTML=reviewHeader()+`<div class="empty"><div class="empty-icon" style="color:var(--ok)"><svg viewBox="0 0 24 24" width="34" height="34" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m8.5 12.5 2.5 2.5 5-5"/></svg></div>
       <div style="font-size:17px;font-weight:700;color:var(--txt)">${(reviewScope||reviewSubj)?'這個範圍完成！':'今日進度完成！'}</div>
       <div style="margin-top:6px">${dueMore?`還有 ${dueMore} 題今天到期（可到設定調高每日上限）`:(upcoming?`還有 ${upcoming} 題在排程中，明天見`:'目前沒有待複習的錯題 🎊')}</div>
       ${upcoming?`<button class="btn ghost" style="margin-top:16px" onclick="reviewAll()">🔁 複習全部未精熟</button>`:''}</div>`;
@@ -1732,7 +1739,7 @@ function showReviewCard(){
       ${imgURL(q)?`<img src="${esc(imgURL(q))}" style="width:100%;border-radius:10px;margin-bottom:10px;background:#0008;cursor:zoom-in" onclick="openLightbox(this.src)" title="點擊放大圖片">`:''}
       ${q.question?`<div style="line-height:1.7;white-space:pre-wrap">${mathRender(q.question)}</div>`:''}
     </div>
-    ${revealed?`
+    ${revealed?`<div class="reveal-box">
     ${myWrite?`<div class="card" style="background:var(--card2)"><div class="muted" style="font-size:12px">✍️ 你剛寫的　${matched===true?'<span class="correct">✓ 和正解一致</span>':(matched===false?'<span class="wrong">✗ 與正解不同</span>':'')}</div><div style="white-space:pre-wrap;margin-top:3px">${mathRender(myWrite)}</div></div>`:''}
     <div class="card" style="background:var(--card2)">
       <div class="row">
@@ -1745,6 +1752,7 @@ function showReviewCard(){
     <div class="row">
       <button class="btn bad" onclick="grade(false)">😵 還不會</button>
       <button class="btn ok" onclick="grade(true)">😎 答對了</button>
+    </div>
     </div>`:`
     <label class="fld" style="color:var(--primary2)">✍️ 先自己作答（自己想過再看，記得最牢）</label>
     <textarea id="reviewWrite" placeholder="把答案或關鍵步驟寫下來，再對答案">${esc(myWrite)}</textarea>
@@ -1882,7 +1890,7 @@ function doSearch(){
   const res=DATA.filter(q=>normText([q.question,q.explain,q.chapter,(q.topics||[]).join(' '),q.passage,q.source,q.subject,q.type,q.ans,q.myAns,q.cause,(q.causes||[]).join(' ')].join(' ')).includes(k));
   $('searchResults').innerHTML=res.length?
     `<div class="muted" style="margin-bottom:8px">找到 ${res.length} 題${res.length>80?'（顯示前 80）':''}</div>`+res.slice(0,80).map(qcardHTML).join('')
-    :'<div class="empty" style="padding:30px"><div class="big">🔍</div>找不到「'+esc($('searchInput').value.trim())+'」</div>';
+    :'<div class="empty" style="padding:30px"><div class="empty-icon"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg></div><div style="font-size:16px;font-weight:700;color:var(--txt)">找不到「'+esc($('searchInput').value.trim())+'」</div><div style="margin-top:6px;font-size:13px">換個關鍵字、主題或標籤試試</div></div>';
 }
 
 /* ================= 安裝 App（iOS / Android）================= */
@@ -2148,7 +2156,7 @@ async function init(){
 }
 
 /* ================= 版本更新機制 ================= */
-const APP_VERSION='14.2（2026-10-02 完善列印公式/搜尋多標籤與錯因/拍照壓縮雙重防競爭/全流程燈箱）';
+const APP_VERSION='14.3（2026-10-02 美感升級·卡片微陰影/控制項圓角咬合/微動效揭曉/精緻空狀態）';
 let swReg=null, swRefreshing=false;
 function showUpdateBanner(){$('updateBanner').classList.add('show')}
 function registerSW(){
