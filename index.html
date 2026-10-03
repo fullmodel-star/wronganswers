@@ -2156,7 +2156,7 @@ async function init(){
 }
 
 /* ================= 版本更新機制 ================= */
-const APP_VERSION='14.3（2026-10-02 美感升級·卡片微陰影/控制項圓角咬合/微動效揭曉/精緻空狀態）';
+const APP_VERSION='14.4（2026-10-03 修第一次造訪頁面自己重整）';
 let swReg=null, swRefreshing=false;
 function showUpdateBanner(){$('updateBanner').classList.add('show')}
 function registerSW(){
@@ -2172,7 +2172,10 @@ function registerSW(){
     });
     setInterval(()=>reg.update().catch(()=>{}),30*60*1000); // 每30分自動檢查
   }).catch(()=>{});
-  navigator.serviceWorker.addEventListener('controllerchange',()=>{
+  /* 2026-10-03 修：sw activate 會 clients.claim()，第一次造訪「沒有控制者→有控制者」也會觸發 controllerchange，
+     原本直接 reload＝新使用者打開 1～2 秒後頁面自己重整。只有本來就有控制者（真的換版）才重新載入。比照 605／607～609。 */
+  var __rlHadCtl = !!(navigator.serviceWorker && navigator.serviceWorker.controller);
+  navigator.serviceWorker.addEventListener('controllerchange',()=>{ if(!__rlHadCtl)return;
     if(swRefreshing)return;swRefreshing=true;location.reload();
   });
 }
