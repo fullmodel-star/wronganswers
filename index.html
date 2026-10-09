@@ -277,8 +277,10 @@ body.lite *{animation:none!important;transition:none!important}
 .update-banner{background:#0d9488!important}
 .update-banner .bins{color:#0d9488!important}
 /* 頁尾簽名：墊高避免被固定底部導覽列蓋住 */
-.rl-signature{margin-top:26px;padding-bottom:calc(30px + env(safe-area-inset-bottom,0) + 78px)}
-@media (min-width:1024px){.rl-signature{padding-bottom:32px}}
+.rl-signature{margin-top:26px;padding-bottom:calc(30px + env(safe-area-inset-bottom,0) + 130px)}
+/* 2026-10-09：右下＋鈕（底 84px、高 58px）與安裝橫幅會壓住頁尾署名與免責 → 頁尾底部留出它們的高度 */
+body:has(.install-banner.show) .rl-signature{padding-bottom:calc(30px + env(safe-area-inset-bottom,0) + 200px)}
+@media (min-width:1024px){.rl-signature{padding-bottom:110px}}
 
 /* ===== 側邊欄（平板橫式 / 桌面）===== */
 .sidebar{display:none}
@@ -2156,7 +2158,7 @@ async function init(){
 }
 
 /* ================= 版本更新機制 ================= */
-const APP_VERSION='14.4（2026-10-03 修第一次造訪頁面自己重整）';
+const APP_VERSION='14.5（2026-10-09 頁尾不再被＋鈕與安裝橫幅蓋住）';
 let swReg=null, swRefreshing=false;
 function showUpdateBanner(){$('updateBanner').classList.add('show')}
 function registerSW(){
