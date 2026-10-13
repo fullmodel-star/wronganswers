@@ -280,6 +280,13 @@ body.lite *{animation:none!important;transition:none!important}
 .install-banner .bx{background:rgba(255,255,255,.22);border:none;color:#fff;width:40px;height:40px;border-radius:10px;font-size:16px;cursor:pointer;flex:none}
 .update-banner{background:#0b6e66!important}
 .update-banner .bins{color:#0b6e66!important}
+/* 2026-10-13：手機版安裝橫幅降為次要（淺底＋框線鈕），不再和「手動加第一題」搶第一眼 */
+@media (max-width:1023px){
+  #installBanner{background:var(--card);color:var(--txt);border:1px solid var(--line)}
+  #installBanner .bins{background:transparent;color:var(--primary);border:1.5px solid var(--primary)}
+  #installBanner .bx{background:transparent;color:var(--dim);border:1px solid var(--line)}
+}
+.modal{scroll-padding-bottom:96px}
 /* 頁尾簽名：墊高避免被固定底部導覽列蓋住 */
 .rl-signature{margin-top:26px;padding-bottom:calc(30px + env(safe-area-inset-bottom,0) + 24px)}
 /* 2026-10-12：手機版安裝橫幅已改成隨內容流動，頁尾只需避開右下＋鈕（body 另有 78px 底導覽留白） */
@@ -522,6 +529,19 @@ body.lite *{animation:none!important;transition:none!important}
   <div class="card" id="installedCard" style="display:none;border-color:var(--ok)">
     <p style="margin:0;font-weight:700"><span style="color:var(--ok)">✓</span> 已在 App 模式執行，隨時可離線使用 🎉</p>
   </div>
+  <!-- 2026-10-13：資料備份移到設定頁最上方（原本在第 3 屏，走查找不到） -->
+  <div class="card" id="backupCard">
+    <h3 style="margin:0 0 6px;font-size:16px">💾 資料備份</h3>
+    <div id="backupInfo" class="muted" style="margin:0 0 10px;font-size:13px"></div>
+    <p class="muted" style="margin:0 0 12px">錯題與照片全部存在這台裝置。定期匯出備份，換裝置可匯入（匯入會以較新的進度合併更新）。</p>
+    <div class="row">
+      <button class="btn ghost sm" onclick="exportData()">⬆️ 匯出備份</button>
+      <button class="btn ghost sm" onclick="document.getElementById('importFile').click()">⬇️ 匯入</button>
+    </div>
+    <input type="file" id="importFile" accept="application/json" style="display:none" onchange="importData(this.files[0])">
+    <div class="hr"></div>
+    <button class="btn bad sm full" onclick="wipeAll()">🗑️ 清空所有資料</button>
+  </div>
   <div class="card">
     <h3 style="margin:0 0 4px;font-size:16px">🤖 Gemini 辨識設定</h3>
     <p class="muted" style="margin:4px 0 10px">拍照自動辨識題目、分類、生成解析。使用 Google Gemini（有免費額度）。</p>
@@ -616,19 +636,6 @@ body.lite *{animation:none!important;transition:none!important}
       <button class="btn ghost sm" onclick="printBook(false)">📄 完整版（含答案）</button>
       <button class="btn ghost sm" onclick="printBook(true)">📝 遮答案版（當考卷）</button>
     </div>
-  </div>
-
-  <div class="card">
-    <h3 style="margin:0 0 6px;font-size:16px">💾 資料備份</h3>
-    <div id="backupInfo" class="muted" style="margin:0 0 10px;font-size:13px"></div>
-    <p class="muted" style="margin:0 0 12px">錯題與照片全部存在這台裝置。定期匯出備份，換裝置可匯入（匯入會以較新的進度合併更新）。</p>
-    <div class="row">
-      <button class="btn ghost sm" onclick="exportData()">⬆️ 匯出備份</button>
-      <button class="btn ghost sm" onclick="document.getElementById('importFile').click()">⬇️ 匯入</button>
-    </div>
-    <input type="file" id="importFile" accept="application/json" style="display:none" onchange="importData(this.files[0])">
-    <div class="hr"></div>
-    <button class="btn bad sm full" onclick="wipeAll()">🗑️ 清空所有資料</button>
   </div>
 
   <div class="card">
@@ -1030,7 +1037,22 @@ function renderCountdown(elId){
 }
 
 /* ================= 導航 ================= */
-function go(p,keepScope){
+/* 返回鍵（2026-10-13）：分頁切換與彈出層寫入瀏覽紀錄，手機返回鍵先關彈出層、再回上一個分頁，在首頁才離開 App */
+let curPage='list', navSkip=0, navQueue=[], navClosing=false;
+function navPush(st){if(navSkip){navQueue.push(st);return}try{history.pushState(st,'')}catch(_){}}
+try{if(!history.state||!history.state.p)history.replaceState({p:'list'},'')}catch(_){}
+window.addEventListener('popstate',e=>{
+  if(navSkip){navSkip--;if(!navSkip){const q=navQueue;navQueue=[];q.forEach(s=>{try{history.pushState(s,'')}catch(_){}})}return}
+  if($('imgLightbox').classList.contains('on')){navClosing=true;closeLightbox();navClosing=false;return}
+  const ms=document.querySelectorAll('.modal-bg.on');
+  if(ms.length){const mid=ms[ms.length-1].id;navClosing=true;tryCloseModal(mid);navClosing=false;
+    if($(mid).classList.contains('on'))navPush({p:curPage,m:mid}); // 使用者選擇不放棄 → 補回這一層
+    return}
+  const st=e.state||{};go(st.p||'list',!!st.k,true);
+});
+function go(p,keepScope,fromPop){
+  if(!fromPop&&p!==curPage)navPush({p:p,k:keepScope?1:0});
+  curPage=p;
   document.querySelectorAll('section.page').forEach(s=>s.classList.remove('on'));
   $('page-'+p).classList.add('on');
   document.querySelectorAll('[data-p]').forEach(b=>b.classList.toggle('on',b.dataset.p===p));
@@ -1041,10 +1063,12 @@ function go(p,keepScope){
   if(p==='stats')renderStats();
   if(p==='settings')loadSettingsUI();
 }
-function openModal(id){$(id).classList.add('on');document.body.style.overflow='hidden'}
-function closeModal(id){$(id).classList.remove('on');document.body.style.overflow=''}
-function openLightbox(src){$('imgLightboxImg').src=src;$('imgLightbox').classList.add('on')}
-function closeLightbox(){$('imgLightbox').classList.remove('on');$('imgLightboxImg').removeAttribute('src')}
+function openModal(id){const was=$(id).classList.contains('on');$(id).classList.add('on');document.body.style.overflow='hidden';if(!was)navPush({p:curPage,m:id})}
+function closeModal(id){const was=$(id).classList.contains('on');$(id).classList.remove('on');if(!document.querySelector('.modal-bg.on'))document.body.style.overflow='';
+  if(was&&!navClosing&&history.state&&history.state.m===id){navSkip++;history.back()}}
+function openLightbox(src){const was=$('imgLightbox').classList.contains('on');$('imgLightboxImg').src=src;$('imgLightbox').classList.add('on');if(!was)navPush({p:curPage,lb:1})}
+function closeLightbox(){const was=$('imgLightbox').classList.contains('on');$('imgLightbox').classList.remove('on');$('imgLightboxImg').removeAttribute('src');
+  if(was&&!navClosing&&history.state&&history.state.lb){navSkip++;history.back()}}
 let addSig='';
 function addFormSig(){return JSON.stringify([['fQuestion','fMyAns','fAns','fExplain','fPassage','fSource','fType','fChapter'].map(i=>$(i).value.trim()),pendingTopics,!!pendingImg])}
 function markAddClean(){addSig=addFormSig()}
@@ -2214,7 +2238,7 @@ async function init(){
 }
 
 /* ================= 版本更新機制 ================= */
-const APP_VERSION='14.7（2026-10-12 體驗改善：觸控目標與字級、空狀態進度、分頁高亮）';
+const APP_VERSION='14.8（2026-10-13 返回鍵回上一層、資料備份移到設定頁頂端）';
 let swReg=null, swRefreshing=false;
 function showUpdateBanner(){$('updateBanner').classList.add('show')}
 function registerSW(){
