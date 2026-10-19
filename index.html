@@ -3,7 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<meta name="theme-color" content="#4E6A7C">
+<meta name="theme-color" content="#F6EFE2" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#1A1311" media="(prefers-color-scheme: dark)">
 <title>錯題管理器</title>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
@@ -18,41 +19,45 @@
 <link rel="stylesheet" href="ridgeline-ui.css">
 <style>
 :root{
-  /* 淺色（預設）· 稜線 theme-denali（本App官方所屬家族:學習與精進),沿用旅遊工具箱的版面手法但改回自己家族的凜峰藍 */
-  --bg:#F7F3EC; --bg2:#EFE9DD; --card:#FFFFFF; --card2:#F4EFE6;
-  --line:#E4DDCE; --txt:#141E2B; --dim:#4F6A82;
-  --primary:#4E6A7C; --primary2:#4E6A7C; --primary-strong:#4E6A7C; --primary-end:#4E6A7C;
-  --grad:#6C8CA0;
+  /* 2026-10-19 版面美化「修練手帳」：米紙底＋筆記本紅，主鈕金色立體（七系列學習家族共用語言）。
+     品牌層（頁首山形小磚＋App 名、頁尾簽名）照舊，只換 App 介面配色。 */
+  --bg:#F6EFE2; --bg2:#EEE4D2; --card:#FFFDF8; --card2:#F6EEE1;
+  --line:#E4D6BF; --txt:#2A1D18; --dim:#6B574B;
+  --primary:#B3352B; --primary2:#A32F26; --primary-strong:#8E2620; --primary-end:#B3352B;
+  --grad:#B3352B; --tint7:#F7E3DC;
   --ok:#16a34a; --warn:#d97706; --bad:#dc2626; --accent:#ca8a04;
-  --card-sh:0 2px 8px rgba(20,30,43,0.035);
+  --card-sh:0 1px 0 rgba(120,80,40,.05),0 8px 18px -12px rgba(90,50,20,.28);
   --radius:16px; --r-pill:20px; --r-card:16px; --r-ctrl:12px; --r-tag:8px;
-  /* 科目色（刻意避開 對錯紅綠、主色藍綠、錯因accent） */
+  --gold:#F7BE2E; --gold-d:#B8811A; --gold-ink:#3A2500;
+  --hero-a:#C8463A; --hero-b:#9E2B25; --hero-c:#6A1C19; --hero-ink:#FFF6E8;
+  --font-round:"WBRound",-apple-system,"Noto Sans TC","Microsoft JhengHei",system-ui,sans-serif;
+  /* 科目色（刻意避開 對錯紅綠、主色、錯因accent） */
   --s-chi:#fb7185; --s-eng:#38bdf8; --s-math:#c084fc; --s-sci:#2dd4bf; --s-soc:#fbbf24; --s-other:#94a3b8;
   --s-his:#fb923c; --s-geo:#22d3ee; --s-civ:#e879a9;
 }
 @media (prefers-color-scheme:dark){:root{
-  --bg:#141E2B; --bg2:#1B2838; --card:#1B2838; --card2:#243447;
-  --line:#2A3A4E; --txt:#EEF3F6; --dim:#8b96a8;
-  --primary:#4E6A7C; --primary2:#8CA6B8; --primary-strong:#4E6A7C; --primary-end:#4E6A7C;
-  --grad:#8CA6B8;
+  --bg:#1A1311; --bg2:#231A17; --card:#271D1A; --card2:#32251F;
+  --line:#47362E; --txt:#F6EDE3; --dim:#BFAA9B;
+  --primary:#C4443A; --primary2:#F2907F; --primary-strong:#8E2620; --primary-end:#C4443A;
+  --grad:#C4443A; --tint7:#3B2520;
   --ok:#22c55e; --warn:#f59e0b; --bad:#ef4444; --accent:#eab308;
   --card-sh:none;
 }}
 :root[data-theme="dark"]{
-  --bg:#141E2B; --bg2:#1B2838; --card:#1B2838; --card2:#243447;
-  --line:#2A3A4E; --txt:#EEF3F6; --dim:#8b96a8;
-  --primary:#4E6A7C; --primary2:#8CA6B8; --primary-strong:#4E6A7C; --primary-end:#4E6A7C;
-  --grad:#8CA6B8;
+  --bg:#1A1311; --bg2:#231A17; --card:#271D1A; --card2:#32251F;
+  --line:#47362E; --txt:#F6EDE3; --dim:#BFAA9B;
+  --primary:#C4443A; --primary2:#F2907F; --primary-strong:#8E2620; --primary-end:#C4443A;
+  --grad:#C4443A; --tint7:#3B2520;
   --ok:#22c55e; --warn:#f59e0b; --bad:#ef4444; --accent:#eab308;
   --card-sh:none;
 }
 :root[data-theme="light"]{
-  --bg:#F7F3EC; --bg2:#EFE9DD; --card:#FFFFFF; --card2:#F4EFE6;
-  --line:#E4DDCE; --txt:#141E2B; --dim:#4F6A82;
-  --primary:#4E6A7C; --primary2:#4E6A7C; --primary-strong:#4E6A7C; --primary-end:#4E6A7C;
-  --grad:#6C8CA0;
+  --bg:#F6EFE2; --bg2:#EEE4D2; --card:#FFFDF8; --card2:#F6EEE1;
+  --line:#E4D6BF; --txt:#2A1D18; --dim:#6B574B;
+  --primary:#B3352B; --primary2:#A32F26; --primary-strong:#8E2620; --primary-end:#B3352B;
+  --grad:#B3352B; --tint7:#F7E3DC;
   --ok:#16a34a; --warn:#d97706; --bad:#dc2626; --accent:#ca8a04;
-  --card-sh:0 2px 8px rgba(20,30,43,0.035);
+  --card-sh:0 1px 0 rgba(120,80,40,.05),0 8px 18px -12px rgba(90,50,20,.28);
 }
 /* theme-denali（ridgeline）會在 body 把 --accent 設成主題色；
    此處奪回 App 既有語意色「錯因黃」，避免被覆蓋（深/淺分別對應原值）。 */
@@ -281,7 +286,7 @@ body.lite *{animation:none!important;transition:none!important}
 .update-banner{background:#0b6e66!important}
 .update-banner .bins{color:#0b6e66!important}
 /* 2026-10-13：手機版安裝橫幅降為次要（淺底＋框線鈕），不再和「手動加第一題」搶第一眼 */
-@media (max-width:1023px){
+@media all{ /* 2026-10-19：桌機也改排在內容最下方，一律用淡底次要樣式 */
   #installBanner{background:var(--card);color:var(--txt);border:1px solid var(--line)}
   #installBanner .bins{background:transparent;color:var(--primary);border:1.5px solid var(--primary)}
   #installBanner .bx{background:transparent;color:var(--dim);border:1px solid var(--line)}
@@ -298,14 +303,6 @@ body.lite *{animation:none!important;transition:none!important}
 
 /* ===== 空狀態（首次使用）===== */
 .welcome{max-width:640px;margin:0 auto}
-.welcome .hero{text-align:center;padding:22px 16px}
-.welcome .w-icon{width:64px;height:64px;border-radius:20px;background:var(--card2);border:1px solid var(--line);display:grid;place-items:center;margin:0 auto 12px;color:var(--primary2)}
-.welcome h2{font-size:20px;font-weight:800;margin:0}
-.welcome .hero p{margin:8px auto 16px;max-width:19em;line-height:1.6}
-.welcome .cta{display:flex;flex-direction:column;gap:10px;max-width:360px;margin:0 auto}
-.welcome .cta .btn{min-height:48px}
-.welcome .cta .btn:not(.ghost){background:var(--accent);border-color:var(--accent);color:#1a1300}
-.welcome .sec-h::before{background:var(--accent)}
 .welcome .sec-h{margin:0 0 10px;font-size:17px;font-weight:800;display:flex;align-items:center;gap:8px}
 .welcome .sec-h::before{content:"";width:4px;height:18px;border-radius:2px;background:var(--primary2)}
 .welcome .stat-grid{margin-bottom:12px}
@@ -336,7 +333,8 @@ body.lite *{animation:none!important;transition:none!important}
   #listArea.group .gcards{display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:start}
   #listArea.group .gcards .card{margin-bottom:0}
   #reviewArea{max-width:700px;margin:0 auto}
-  #page-stats{display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:start}
+  /* 2026-10-19 修：原本 #page-stats{display:grid} 的 id 權重蓋過 section.page{display:none}，桌機在錯題本頁下方也會露出統計頁 */
+  #page-stats.on{display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:start}
   #page-stats>#statCountdown,#page-stats>#statCheer,#page-stats>.stat-grid{grid-column:1 / -1}
   #page-stats .card{margin-bottom:0}
   .install-banner{position:fixed;margin:0;z-index:47;background:var(--grad);left:auto;right:26px;bottom:26px;max-width:360px}
@@ -345,6 +343,111 @@ body.lite *{animation:none!important;transition:none!important}
   .wrap{max-width:1200px}
   #listArea.group .gcards{grid-template-columns:1fr 1fr 1fr}
   #listArea.flat{grid-template-columns:1fr 1fr 1fr}
+}
+
+/* ===== 2026-10-19 版面美化「修練手帳」=====
+   七系列（學習家族 700–704）共用語言：粉圓圓體、Fluent 3D 插圖、首屏主視覺卡（漸層＋3D＋大標＋唯一主行動）、
+   金色立體主鈕（下緣實色陰影、按下會沉）、HUD 狀態列、3D 功能圖格。701 主題＝筆記本紅＋米紙。 */
+@font-face{font-family:"WBRound";src:url(vendor/round-ui/wb-round.woff2) format("woff2");font-display:swap}
+body.theme-denali{--hdr:var(--bg);--on:var(--txt)}
+body{background:radial-gradient(130% 50% at 50% 0%,color-mix(in srgb,var(--primary) 7%,var(--bg)) 0%,var(--bg) 70%) fixed var(--bg)}
+header.rl-appbar{background:color-mix(in srgb,var(--bg) 94%,transparent);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+header.rl-appbar .rl-mark{background:var(--primary);box-shadow:0 3px 0 var(--primary-strong)}
+header.rl-appbar .rl-title{font-family:var(--font-round);font-weight:400;letter-spacing:1px;font-size:21px}
+header.rl-appbar .rl-sub{color:var(--dim)}
+header.rl-appbar .iconbtn,header.rl-appbar .lineShareFab,header.rl-appbar .reportFab{background:var(--card);border:1px solid var(--line);color:var(--txt)}
+.btn,.chip,.seg button,nav.tabs button,.sidebar button,.sidebar .sb-ttl,.stat .n,.stat .l,.pill,.card>h3,.modal h2,.sec-h,.install-banner .txt b,.tgu,.guide>summary,.tiles7 button,.hud7 b{font-family:var(--font-round);font-weight:400}
+/* 線條圖示（Tabler sprite） */
+.ti{width:18px;height:18px;flex:none;display:inline-block;vertical-align:-3px}
+.card>h3{display:flex;align-items:center;gap:8px}
+.card>h3 .ti,.guide>summary .ti,label.fld .ti{color:var(--primary2)}
+.guide>summary .ti,label.fld .ti{margin-right:6px}
+.btn.line{background:transparent;color:var(--primary2);border:1.5px solid color-mix(in srgb,var(--primary) 70%,transparent)}
+@media (hover:hover){.btn.line:hover{background:var(--tint7)}}
+.btn:not(.ghost):not(.line):not(.go):not(.cta2):not(.bad):not(.ok){box-shadow:0 3px 0 var(--primary-strong)}
+.btn:not(.ghost):not(.line):not(.go):not(.cta2):not(.bad):not(.ok):active{transform:translateY(2px);box-shadow:0 1px 0 var(--primary-strong)}
+.f3i{width:18px;height:18px;flex:none}
+/* 底部分頁與側欄：3D 圖示 */
+/* 2026-10-19 審查修：分頁列改不透明米紙底（深色用深色底），捲動時後面的字不會透出來 */
+nav.tabs{background:var(--bg);border-top:1px solid var(--line);box-shadow:0 -8px 20px -14px rgba(60,30,10,.4)}
+nav.tabs button .i img,.sidebar button .i img{width:26px;height:26px;display:block}
+nav.tabs button.on{background:var(--tint7);color:var(--primary2)}
+nav.tabs button.on .i{transform:translateY(-1px) scale(1.08)}
+.fab{background:var(--primary);box-shadow:0 5px 0 var(--primary-strong),0 12px 22px -10px rgba(110,28,25,.65)}
+.fab:active{transform:translateY(3px);box-shadow:0 2px 0 var(--primary-strong)}
+/* 安裝橫幅：放在內容最下方（頁尾上面），不再和首屏主鈕搶第一眼 */
+.wrap>.install-banner{margin:18px 0 0}
+
+/* 首屏主視覺：筆記本封面（書背縫線＋橫線紙紋） */
+.top7{display:flex;flex-direction:column;margin:0 0 14px}
+.top7 .side7{display:contents}
+.top7 .hud7{order:-1}
+.hero7{position:relative;overflow:hidden;border-radius:24px;padding:20px 18px 22px 32px;margin:0 0 12px;color:var(--hero-ink);
+  background:repeating-linear-gradient(180deg,transparent 0 33px,rgba(255,255,255,.07) 33px 34px),linear-gradient(150deg,var(--hero-a) 0%,var(--hero-b) 55%,var(--hero-c) 100%);
+  box-shadow:0 18px 30px -18px rgba(110,28,25,.8),inset 0 0 0 1px rgba(255,214,120,.3)}
+.hero7::before{content:"";position:absolute;left:0;top:0;bottom:0;width:15px;background:rgba(0,0,0,.2);border-right:2px dashed rgba(255,230,190,.4)}
+.hero7 .k{font:400 14px var(--font-round);color:var(--gold);letter-spacing:2px}
+.hero7 h2{margin:6px 0 8px;font:400 30px/1.25 var(--font-round);color:var(--hero-ink);max-width:calc(100% - 100px)}
+.hero7 h2 .n{color:var(--gold);font-size:1.4em;margin:0 2px;font-variant-numeric:tabular-nums}
+.hero7 p{margin:0 0 12px;font-size:14px;line-height:1.6;opacity:.94}
+.hero7 .xp{height:12px;border-radius:99px;background:rgba(0,0,0,.3);overflow:hidden;margin-bottom:6px}
+.hero7 .xp i{display:block;height:100%;min-width:12px;background:linear-gradient(90deg,var(--gold),#FF9A3D);border-radius:99px}
+.hero7 .xpl{font:400 13px var(--font-round);opacity:.92;margin-bottom:14px}
+.hero7 .acts{display:flex;flex-wrap:wrap;gap:10px;align-items:center;position:relative;z-index:1}
+.hero7 .acts.col{flex-direction:column;align-items:stretch;max-width:340px}
+.hero7 .art{position:absolute;right:10px;top:14px;width:100px;height:116px;pointer-events:none}
+.hero7 .art .a1{position:absolute;right:4px;top:0;width:88px;height:88px;transform:rotate(-8deg);filter:drop-shadow(0 10px 14px rgba(0,0,0,.35))}
+.hero7 .art .a2{position:absolute;right:-4px;top:58px;width:54px;height:54px;filter:drop-shadow(0 6px 8px rgba(0,0,0,.35))}
+.btn.go{background:var(--gold);color:var(--gold-ink);border:0;border-radius:16px;font:400 18px var(--font-round);padding:11px 22px;min-height:54px;box-shadow:0 5px 0 var(--gold-d),0 10px 18px -8px rgba(0,0,0,.45);transition:transform .08s,box-shadow .08s}
+.btn.go:active{transform:translateY(4px);box-shadow:0 1px 0 var(--gold-d)}
+.btn.go img{width:28px;height:28px;flex:none}
+.hero7 .btn.cta2{background:rgba(255,248,236,.12);color:var(--hero-ink);border:1px solid rgba(255,240,220,.5);min-height:48px;font-size:15px}
+/* HUD 狀態列 */
+.hud7{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:0 0 12px}
+.hud7 .h{display:flex;align-items:center;gap:7px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:8px 9px;min-width:0;box-shadow:var(--card-sh)}
+.hud7 img{width:28px;height:28px;flex:none}
+.hud7 .v{display:flex;flex-direction:column;min-width:0;line-height:1.15}
+.hud7 b{font-size:18px;color:var(--txt);font-variant-numeric:tabular-nums;white-space:nowrap}
+.hud7 .l{font-size:13px;color:var(--dim);white-space:nowrap}
+/* 3D 功能圖格（次要入口） */
+.tiles7{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:0}
+.tiles7 button{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:10px 4px 9px;display:flex;flex-direction:column;align-items:center;gap:5px;font-size:14px;color:var(--txt);cursor:pointer;min-height:86px;box-shadow:var(--card-sh);transition:transform .12s,border-color .12s}
+.tiles7 button:active{transform:translateY(2px)}
+@media (hover:hover){.tiles7 button:hover{border-color:color-mix(in srgb,var(--primary) 45%,var(--line))}}
+.tiles7 img{width:42px;height:42px;flex:none}
+.tiles7 .tl{display:flex;flex-direction:column;align-items:center;min-width:0}
+.tiles7 small{display:none;font:400 13px -apple-system,"Noto Sans TC","Microsoft JhengHei",sans-serif;color:var(--dim);margin-top:2px}
+/* 空狀態（首次使用） */
+.welcome ol.steps li img{width:36px;height:36px;flex:none}
+.welcome .stat .n{color:var(--primary2)}
+@media (min-width:1024px){
+  .sidebar{background:var(--bg2)}
+  .sidebar .sb-ttl{font-size:19px;color:var(--txt);letter-spacing:1px}
+  .sidebar button .i{width:26px}
+  .sidebar button.on{background:var(--card);color:var(--primary2);box-shadow:inset 0 0 0 1px var(--line),var(--card-sh)}
+  .top7{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:18px;align-items:stretch;margin:0 0 18px}
+  .top7 .side7{display:flex;flex-direction:column;gap:12px;min-width:0}
+  .top7 .hud7{order:0;margin:0}
+  .top7 .hero7{margin:0;padding:34px 36px 34px 48px;min-height:300px;display:flex;flex-direction:column;justify-content:center}
+  .hero7 h2{font-size:40px}
+  .hero7 h2 br{display:none}
+  .hero7 h2,.hero7 p,.hero7 .xp{max-width:calc(100% - 200px)}
+  .hero7 p{font-size:15px}
+  .hero7 .art{width:190px;height:210px;right:26px;top:50%;transform:translateY(-50%)}
+  .hero7 .art .a1{width:160px;height:160px}
+  .hero7 .art .a2{width:86px;height:86px;top:120px;right:-8px}
+  .side7 .tiles7{grid-template-columns:repeat(2,minmax(0,1fr));flex:1}
+  .tiles7 button{flex-direction:row;justify-content:flex-start;gap:12px;padding:12px 14px;text-align:left;font-size:17px}
+  .tiles7 img{width:50px;height:50px}
+  .tiles7 .tl{align-items:flex-start}
+  .tiles7 small{display:block}
+  .welcome.top7{max-width:none}
+  .welcome .side7 .card{margin:0}
+  /* 2026-10-19 審查修：桌機不再用浮動＋鈕與浮動安裝橫幅（會蓋住分組列右側「複習這主題」等按鈕）；
+     新增改由側欄「新增錯題」與主視覺旁圖格進入，安裝橫幅改排在內容最下方 */
+  .fab{display:none!important}
+  .wrap>.install-banner{position:static;max-width:none;margin:18px 0 0}
+  .sidebar .sb-add{color:var(--txt)}
 }
 
 </style>
@@ -373,6 +476,9 @@ body.lite *{animation:none!important;transition:none!important}
 <meta name="twitter:image:alt" content="錯題管理器 — 錯題複習與弱點分析">
 </head>
 <body class="theme-denali">
+<!-- TABLER_SPRITE_START：Tabler Icons 3.49.0（MIT，授權見 vendor/tabler-icons/LICENSE.txt）；由 _tools/build_icon_sprite.py 產生，勿手改 -->
+<svg xmlns="http://www.w3.org/2000/svg" style="position:absolute;width:0;height:0;overflow:hidden" aria-hidden="true" focusable="false"><symbol id="ti-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10a7 7 0 1 0 14 0a7 7 0 1 0 -14 0"/><path d="M21 21l-6 -6"/></symbol><symbol id="ti-filter" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6a2 2 0 1 0 4 0a2 2 0 1 0 -4 0"/><path d="M4 6l8 0"/><path d="M16 6l4 0"/><path d="M6 12a2 2 0 1 0 4 0a2 2 0 1 0 -4 0"/><path d="M4 12l2 0"/><path d="M10 12l10 0"/><path d="M15 18a2 2 0 1 0 4 0a2 2 0 1 0 -4 0"/><path d="M4 18l11 0"/><path d="M19 18l1 0"/></symbol><symbol id="ti-x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6l-12 12"/><path d="M6 6l12 12"/></symbol><symbol id="ti-list" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 5h8"/><path d="M13 9h5"/><path d="M13 15h8"/><path d="M13 19h5"/><path d="M3 5a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v4a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1l0 -4"/><path d="M3 15a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v4a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1l0 -4"/></symbol><symbol id="ti-grid" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v4a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1l0 -4"/><path d="M14 5a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v4a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1l0 -4"/><path d="M4 15a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v4a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1l0 -4"/><path d="M14 15a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v4a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1l0 -4"/></symbol><symbol id="ti-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3l8 -8"/><path d="M20 12v6a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h9"/></symbol><symbol id="ti-flame" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 10.941c2.333 -3.308 .167 -7.823 -1 -8.941c0 3.395 -2.235 5.299 -3.667 6.706c-1.43 1.408 -2.333 3.294 -2.333 5.588c0 3.704 3.134 6.706 7 6.706c3.866 0 7 -3.002 7 -6.706c0 -1.712 -1.232 -4.403 -2.333 -5.588c-2.084 3.353 -3.257 3.353 -4.667 2.235"/></symbol><symbol id="ti-star" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 17.75l-6.172 3.245l1.179 -6.873l-5 -4.867l6.9 -1l3.086 -6.253l3.086 6.253l6.9 1l-5 4.867l1.179 6.873l-6.158 -3.245"/></symbol><symbol id="ti-star-f" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M8.243 7.34l-6.38 .925l-.113 .023a1 1 0 0 0 -.44 1.684l4.622 4.499l-1.09 6.355l-.013 .11a1 1 0 0 0 1.464 .944l5.706 -3l5.693 3l.1 .046a1 1 0 0 0 1.352 -1.1l-1.091 -6.355l4.624 -4.5l.078 -.085a1 1 0 0 0 -.633 -1.62l-6.38 -.926l-2.852 -5.78a1 1 0 0 0 -1.794 0l-2.853 5.78z"/></symbol><symbol id="ti-camera" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 7h1a2 2 0 0 0 2 -2a1 1 0 0 1 1 -1h6a1 1 0 0 1 1 1a2 2 0 0 0 2 2h1a2 2 0 0 1 2 2v9a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-9a2 2 0 0 1 2 -2"/><path d="M9 13a3 3 0 1 0 6 0a3 3 0 0 0 -6 0"/></symbol><symbol id="ti-photo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 8h.01"/><path d="M3 6a3 3 0 0 1 3 -3h12a3 3 0 0 1 3 3v12a3 3 0 0 1 -3 3h-12a3 3 0 0 1 -3 -3v-12"/><path d="M3 16l5 -5c.928 -.893 2.072 -.893 3 0l5 5"/><path d="M14 14l1 -1c.928 -.893 2.072 -.893 3 0l3 3"/></symbol><symbol id="ti-trash" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7l16 0"/><path d="M10 11l0 6"/><path d="M14 11l0 6"/><path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12"/><path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3"/></symbol><symbol id="ti-upload" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2 -2v-2"/><path d="M7 9l5 -5l5 5"/><path d="M12 4l0 12"/></symbol><symbol id="ti-download" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2 -2v-2"/><path d="M7 11l5 5l5 -5"/><path d="M12 4l0 12"/></symbol><symbol id="ti-plug" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 12l5 5l-1.5 1.5a3.536 3.536 0 1 1 -5 -5l1.5 -1.5"/><path d="M17 12l-5 -5l1.5 -1.5a3.536 3.536 0 1 1 5 5l-1.5 1.5"/><path d="M3 21l2.5 -2.5"/><path d="M18.5 5.5l2.5 -2.5"/><path d="M10 11l-2 2"/><path d="M13 14l-2 2"/></symbol><symbol id="ti-save" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 4h10l4 4v10a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2"/><path d="M10 14a2 2 0 1 0 4 0a2 2 0 1 0 -4 0"/><path d="M14 4l0 4l-6 0l0 -4"/></symbol><symbol id="ti-calendar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2l0 -12"/><path d="M16 3l0 4"/><path d="M8 3l0 4"/><path d="M4 11l16 0"/><path d="M8 15h2v2h-2l0 -2"/></symbol><symbol id="ti-repeat" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v-3a3 3 0 0 1 3 -3h13m-3 -3l3 3l-3 3"/><path d="M20 12v3a3 3 0 0 1 -3 3h-13m3 3l-3 -3l3 -3"/></symbol><symbol id="ti-bolt" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 3l0 7l6 0l-8 11l0 -7l-6 0l8 -11"/></symbol><symbol id="ti-alert" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.802 2.165l5.575 2.389c.48 .206 .863 .589 1.07 1.07l2.388 5.574c.22 .512 .22 1.092 0 1.604l-2.389 5.575c-.206 .48 -.589 .863 -1.07 1.07l-5.574 2.388c-.512 .22 -1.092 .22 -1.604 0l-5.575 -2.389a2.036 2.036 0 0 1 -1.07 -1.07l-2.388 -5.574a2.036 2.036 0 0 1 0 -1.604l2.389 -5.575c.206 -.48 .589 -.863 1.07 -1.07l5.574 -2.388a2.036 2.036 0 0 1 1.604 0"/><path d="M12 8v4"/><path d="M12 16h.01"/></symbol><symbol id="ti-clock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13a7 7 0 1 0 14 0a7 7 0 0 0 -14 0"/><path d="M14.5 10.5l-2.5 2.5"/><path d="M17 8l1 -1"/><path d="M14 3h-4"/></symbol><symbol id="ti-target" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 12a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"/><path d="M7 12a5 5 0 1 0 10 0a5 5 0 1 0 -10 0"/><path d="M3 12a9 9 0 1 0 18 0a9 9 0 1 0 -18 0"/></symbol><symbol id="ti-books" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 5a1 1 0 0 1 1 -1h2a1 1 0 0 1 1 1v14a1 1 0 0 1 -1 1h-2a1 1 0 0 1 -1 -1l0 -14"/><path d="M9 5a1 1 0 0 1 1 -1h2a1 1 0 0 1 1 1v14a1 1 0 0 1 -1 1h-2a1 1 0 0 1 -1 -1l0 -14"/><path d="M5 8h4"/><path d="M9 16h4"/><path d="M13.803 4.56l2.184 -.53c.562 -.135 1.133 .19 1.282 .732l3.695 13.418a1.02 1.02 0 0 1 -.634 1.219l-.133 .041l-2.184 .53c-.562 .135 -1.133 -.19 -1.282 -.732l-3.695 -13.418a1.02 1.02 0 0 1 .634 -1.219l.133 -.041"/><path d="M14 9l4 -1"/><path d="M16 16l3.923 -.98"/></symbol><symbol id="ti-chart" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 13a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v6a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1l0 -6"/><path d="M15 9a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v10a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1l0 -10"/><path d="M9 5a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v14a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1l0 -14"/><path d="M4 20h14"/></symbol><symbol id="ti-up" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l6 -6l4 4l8 -8"/><path d="M14 7l7 0l0 7"/></symbol><symbol id="ti-down" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7l6 6l4 -4l8 8"/><path d="M21 10l0 7l-7 0"/></symbol><symbol id="ti-install" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.5 21h-4.5a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2h8a2 2 0 0 1 2 2v7"/><path d="M11 4h2"/><path d="M12 17v.01"/><path d="M19 16v6"/><path d="M22 19l-3 3l-3 -3"/></symbol><symbol id="ti-db" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6a8 3 0 1 0 16 0a8 3 0 1 0 -16 0"/><path d="M4 6v6a8 3 0 0 0 16 0v-6"/><path d="M4 12v6a8 3 0 0 0 16 0v-6"/></symbol><symbol id="ti-sparkles" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 18a2 2 0 0 1 2 2a2 2 0 0 1 2 -2a2 2 0 0 1 -2 -2a2 2 0 0 1 -2 2m0 -12a2 2 0 0 1 2 2a2 2 0 0 1 2 -2a2 2 0 0 1 -2 -2a2 2 0 0 1 -2 2m-7 12a6 6 0 0 1 6 -6a6 6 0 0 1 -6 -6a6 6 0 0 1 -6 6a6 6 0 0 1 6 6"/></symbol><symbol id="ti-palette" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21a9 9 0 0 1 0 -18c4.97 0 9 3.582 9 8c0 1.06 -.474 2.078 -1.318 2.828c-.844 .75 -1.989 1.172 -3.182 1.172h-2.5a2 2 0 0 0 -1 3.75a1.3 1.3 0 0 1 -1 2.25"/><path d="M7.5 10.5a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"/><path d="M11.5 7.5a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"/><path d="M15.5 10.5a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"/></symbol><symbol id="ti-folders" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h3l2 2h5a2 2 0 0 1 2 2v7a2 2 0 0 1 -2 2h-10a2 2 0 0 1 -2 -2v-9a2 2 0 0 1 2 -2"/><path d="M17 16v2a2 2 0 0 1 -2 2h-10a2 2 0 0 1 -2 -2v-9a2 2 0 0 1 2 -2h2"/></symbol><symbol id="ti-printer" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 17h2a2 2 0 0 0 2 -2v-4a2 2 0 0 0 -2 -2h-14a2 2 0 0 0 -2 2v4a2 2 0 0 0 2 2h2"/><path d="M17 9v-4a2 2 0 0 0 -2 -2h-6a2 2 0 0 0 -2 2v4"/><path d="M7 15a2 2 0 0 1 2 -2h6a2 2 0 0 1 2 2v4a2 2 0 0 1 -2 2h-6a2 2 0 0 1 -2 -2l0 -4"/></symbol><symbol id="ti-info" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0"/><path d="M12 9h.01"/><path d="M11 12h1v4h1"/></symbol><symbol id="ti-back" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14l-4 -4l4 -4"/><path d="M5 10h11a4 4 0 1 1 0 8h-1"/></symbol><symbol id="ti-refresh" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11a8.1 8.1 0 0 0 -15.5 -2m-.5 -4v4h4"/><path d="M4 13a8.1 8.1 0 0 0 15.5 2m.5 4v-4h-4"/></symbol><symbol id="ti-pencil" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4"/><path d="M13.5 6.5l4 4"/></symbol><symbol id="ti-file" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3v4a1 1 0 0 0 1 1h4"/><path d="M17 21h-10a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2h7l5 5v11a2 2 0 0 1 -2 2"/><path d="M9 9l1 0"/><path d="M9 13l6 0"/><path d="M9 17l6 0"/></symbol><symbol id="ti-eyeoff" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.585 10.587a2 2 0 0 0 2.829 2.828"/><path d="M16.681 16.673a8.717 8.717 0 0 1 -4.681 1.327c-3.6 0 -6.6 -2 -9 -6c1.272 -2.12 2.712 -3.678 4.32 -4.674m2.86 -1.146a9.055 9.055 0 0 1 1.82 -.18c3.6 0 6.6 2 9 6c-.666 1.11 -1.379 2.067 -2.138 2.87"/><path d="M3 3l18 18"/></symbol></svg>
+<!-- TABLER_SPRITE_END -->
 
 <header class="rl-appbar">
   <span class="rl-mark"><img class="rl-glyph" src="rl-mark-denali-white.png" width="30" height="30" alt="" style="object-fit:contain"></span>
@@ -388,20 +494,14 @@ body.lite *{animation:none!important;transition:none!important}
 <!-- 側邊欄（平板橫式/桌面顯示） -->
 <aside class="sidebar">
   <div class="sb-ttl">錯題管理器</div>
-  <button class="on" data-p="list" onclick="go('list')"><span class="i"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5C4 4.67 4.67 4 5.5 4H12v16H5.5A1.5 1.5 0 0 1 4 18.5z"/><path d="M20 5.5c0-.83-.67-1.5-1.5-1.5H12v16h6.5c.83 0 1.5-.67 1.5-1.5z"/></svg></span>錯題本</button>
-  <button data-p="review" onclick="go('review')"><span class="i"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.5c1 2.5-1 3.5-1 5.5 0 1.2 1 2 2 2 1.3 0 2-1.2 1.7-2.5C16.5 9.5 18 12 18 14.5A6 6 0 1 1 6 14.5c0-2 1-3.7 2.3-5.2"/></svg></span>複習</button>
-  <button data-p="stats" onclick="go('stats')"><span class="i"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 20V10M12 20V4M19 20v-7"/></svg></span>統計</button>
-  <button data-p="settings" onclick="go('settings')"><span class="i"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 13.5a7.5 7.5 0 0 0 0-3l1.9-1.5-2-3.4-2.3.9a7.4 7.4 0 0 0-2.6-1.5L14 2.5h-4l-.4 2.5a7.4 7.4 0 0 0-2.6 1.5l-2.3-.9-2 3.4L4.6 10.5a7.5 7.5 0 0 0 0 3L2.7 15l2 3.4 2.3-.9c.8.7 1.6 1.2 2.6 1.5l.4 2.5h4l.4-2.5a7.4 7.4 0 0 0 2.6-1.5l2.3.9 2-3.4z"/></svg></span>設定</button>
+  <button class="on" data-p="list" onclick="go('list')"><span class="i"><img src="vendor/fluent-3d/book.png" alt="" width="26" height="26"></span>錯題本</button>
+  <button data-p="review" onclick="go('review')"><span class="i"><img src="vendor/fluent-3d/fire.png" alt="" width="26" height="26"></span>複習</button>
+  <button data-p="stats" onclick="go('stats')"><span class="i"><img src="vendor/fluent-3d/chart.png" alt="" width="26" height="26"></span>統計</button>
+  <button data-p="settings" onclick="go('settings')"><span class="i"><img src="vendor/fluent-3d/gear.png" alt="" width="26" height="26"></span>設定</button>
+  <button class="sb-add" onclick="openAdd()"><span class="i"><img src="vendor/fluent-3d/pencil.png" alt="" width="26" height="26"></span>新增錯題</button>
   <div class="sb-spacer"></div>
-  <button onclick="openSearch()"><span class="i"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg></span>搜尋</button>
+  <button onclick="openSearch()"><span class="i"><img src="vendor/fluent-3d/search.png" alt="" width="26" height="26"></span>搜尋</button>
 </aside>
-
-<!-- 安裝橫幅 -->
-<div class="install-banner" id="installBanner">
-  <div class="txt"><b>把錯題本裝到桌面</b><br>像 App 一樣開，可離線使用</div>
-  <button class="bins" onclick="doInstall()">安裝</button>
-  <button class="bx" onclick="dismissInstall()" aria-label="關閉安裝提示">✕</button>
-</div>
 
 <!-- 版本更新橫幅 -->
 <div class="install-banner update-banner" id="updateBanner">
@@ -420,9 +520,9 @@ body.lite *{animation:none!important;transition:none!important}
     <div class="chips" id="presetBar" style="margin-bottom:8px"></div>
     <div class="chips" id="subjFilter"></div>
     <div class="row" style="gap:8px;margin-top:10px">
-      <input id="listSearch" placeholder="🔍 搜尋這些題…" oninput="listSearchInput()" style="flex:1">
-      <button class="btn ghost sm" style="flex:none;width:auto;min-width:0;padding:9px 12px" onclick="toggleFilterAdv()" id="filterAdvBtn">⚙ 篩選</button>
-      <button class="btn ghost sm" style="flex:none;width:auto;min-width:0;padding:9px 12px;display:none" id="clearFilterBtn" onclick="clearFilters()">✖ 清除</button>
+      <input id="listSearch" placeholder="搜尋這些題…" oninput="listSearchInput()" style="flex:1">
+      <button class="btn ghost sm" style="flex:none;width:auto;min-width:0;padding:9px 12px" onclick="toggleFilterAdv()" id="filterAdvBtn"><svg class="ti" aria-hidden="true"><use href="#ti-filter"/></svg>篩選</button>
+      <button class="btn ghost sm" style="flex:none;width:auto;min-width:0;padding:9px 12px;display:none" id="clearFilterBtn" onclick="clearFilters()"><svg class="ti" aria-hidden="true"><use href="#ti-x"/></svg>清除</button>
     </div>
     <div id="filterAdvanced" style="display:none">
       <div class="hr" style="margin:11px 0"></div>
@@ -433,7 +533,7 @@ body.lite *{animation:none!important;transition:none!important}
           <option value="unmastered">未精熟</option>
           <option value="review">待複習</option>
           <option value="learning">複習中</option>
-          <option value="leech">🔴 頑固題</option>
+          <option value="leech">頑固題</option>
           <option value="mastered">已精熟</option>
         </select>
         <select id="sortBy" onchange="renderList()" style="max-width:100px">
@@ -445,7 +545,7 @@ body.lite *{animation:none!important;transition:none!important}
           <option value="">全部難度</option><option value="易">易</option><option value="中">中</option><option value="難">難</option>
         </select>
         <select id="filterCause2" onchange="renderList()"><option value="">全部錯因</option></select>
-        <button class="btn ghost sm" id="starToggle" onclick="toggleStarFilter()" style="max-width:96px">☆ 重點</button>
+        <button class="btn ghost sm" id="starToggle" onclick="toggleStarFilter()" style="max-width:96px"><svg class="ti" aria-hidden="true"><use href="#ti-star"/></svg>重點</button>
       </div>
       <div class="row" style="gap:8px;margin-top:8px">
         <select id="filterUnit" onchange="renderList()"><option value="">全部單元</option></select>
@@ -459,12 +559,12 @@ body.lite *{animation:none!important;transition:none!important}
     </div>
     <div class="row" style="gap:8px;margin-top:10px">
       <div class="seg" style="flex:1" id="viewSeg">
-        <button data-v="flat" onclick="setView('flat')">📋 列表</button>
-        <button class="on" data-v="group" onclick="setView('group')">🎯 按主題分組</button>
+        <button data-v="flat" onclick="setView('flat')"><svg class="ti" aria-hidden="true"><use href="#ti-list"/></svg>列表</button>
+        <button class="on" data-v="group" onclick="setView('group')"><svg class="ti" aria-hidden="true"><use href="#ti-grid"/></svg>按主題分組</button>
       </div>
-      <button class="btn ghost sm" style="flex:none;width:auto;min-width:0;padding:0 12px" onclick="toggleSelectMode()">☑️ 選取</button>
+      <button class="btn ghost sm" style="flex:none;width:auto;min-width:0;padding:0 12px" onclick="toggleSelectMode()"><svg class="ti" aria-hidden="true"><use href="#ti-check"/></svg>選取</button>
     </div>
-    <button class="btn full sm" id="reviewFilteredBtn" style="margin-top:10px;display:none" onclick="reviewFiltered()">🔥 複習目前篩選的這些題</button>
+    <button class="btn line full sm" id="reviewFilteredBtn" style="margin-top:10px;display:none" onclick="reviewFiltered()"><svg class="ti" aria-hidden="true"><use href="#ti-flame"/></svg><span class="lbl">複習目前篩選的這些題</span></button>
   </div>
   <div id="listArea"></div>
   <div id="listMore" style="text-align:center;margin-top:6px"></div>
@@ -472,9 +572,9 @@ body.lite *{animation:none!important;transition:none!important}
   <div id="batchBar" style="display:none;position:fixed;left:8px;right:8px;bottom:calc(84px + env(safe-area-inset-bottom,0));z-index:47;background:var(--card);border:1px solid var(--line);border-radius:14px;box-shadow:var(--card-sh);padding:8px;gap:6px;align-items:center;flex-wrap:wrap">
     <span style="font-weight:700;font-size:13px;padding:0 4px">已選 <b id="batchCount">0</b></span>
     <button class="btn ghost sm" style="width:auto;padding:6px 9px" onclick="batchSelectAll()">全選</button>
-    <button class="btn ghost sm" style="width:auto;padding:6px 9px" onclick="batchStar()">⭐</button>
+    <button class="btn ghost sm" style="width:auto;padding:6px 9px" onclick="batchStar()"><svg class="ti" aria-hidden="true"><use href="#ti-star"/></svg>重點</button>
     <button class="btn ghost sm" style="width:auto;padding:6px 9px" onclick="batchRetag()">改主題</button>
-    <button class="btn bad sm" style="width:auto;padding:6px 9px" onclick="batchDelete()">🗑️</button>
+    <button class="btn bad sm" style="width:auto;padding:6px 9px" onclick="batchDelete()"><svg class="ti" aria-hidden="true"><use href="#ti-trash"/></svg>刪除</button>
     <span style="flex:1"></span>
     <button class="btn ghost sm" style="width:auto;padding:6px 9px" onclick="toggleSelectMode()">完成</button>
   </div>
@@ -491,30 +591,30 @@ body.lite *{animation:none!important;transition:none!important}
   <div id="statCheer"></div>
   <div class="stat-grid" id="statTop"></div>
   <div class="card" style="margin-top:14px">
-    <h3 style="margin:0 0 4px;font-size:16px">🎯 弱點主題（錯最多）</h3>
+    <h3 style="margin:0 0 4px;font-size:16px"><svg class="ti" aria-hidden="true"><use href="#ti-target"/></svg>弱點主題（錯最多）</h3>
     <p class="muted" style="margin:0 0 12px;font-size:13px">點主題即可只複習這個主題的錯題</p>
     <div id="statTopic"></div>
   </div>
   <div class="card">
-    <h3 style="margin:0 0 4px;font-size:16px">📚 課綱覆蓋</h3>
+    <h3 style="margin:0 0 4px;font-size:16px"><svg class="ti" aria-hidden="true"><use href="#ti-books"/></svg>課綱覆蓋</h3>
     <p class="muted" style="margin:0 0 12px;font-size:13px">你的錯題涵蓋了各科課綱的哪些知識點（依 108 課綱）</p>
     <div id="statCoverage"></div>
   </div>
   <div class="card">
-    <h3 style="margin:0 0 12px;font-size:16px">📊 各科錯題分布</h3>
+    <h3 style="margin:0 0 12px;font-size:16px"><svg class="ti" aria-hidden="true"><use href="#ti-chart"/></svg>各科錯題分布</h3>
     <div id="statSubject"></div>
   </div>
   <div class="card">
-    <h3 style="margin:0 0 12px;font-size:16px">🔥 複習進度</h3>
+    <h3 style="margin:0 0 12px;font-size:16px"><svg class="ti" aria-hidden="true"><use href="#ti-flame"/></svg>複習進度</h3>
     <div id="statProgress"></div>
   </div>
   <div class="card">
-    <h3 style="margin:0 0 4px;font-size:16px">📈 近期正確率</h3>
+    <h3 style="margin:0 0 4px;font-size:16px"><svg class="ti" aria-hidden="true"><use href="#ti-up"/></svg>近期正確率</h3>
     <p class="muted" style="margin:0 0 10px;font-size:13px">最近 14 天每天複習的答對率</p>
     <div id="statTrend"></div>
   </div>
   <details class="guide" style="background:var(--card)">
-    <summary>📉 錯因分析（次要參考）</summary>
+    <summary><span><svg class="ti" aria-hidden="true"><use href="#ti-down"/></svg>錯因分析（次要參考）</span></summary>
     <div class="gbody"><div id="statCause"></div></div>
   </details>
 </section>
@@ -522,28 +622,28 @@ body.lite *{animation:none!important;transition:none!important}
 <!-- ============ 設定 ============ -->
 <section class="page" id="page-settings">
   <div class="card" id="installCard" style="display:none;border-color:var(--primary)">
-    <h3 style="margin:0 0 4px;font-size:16px">📲 安裝到桌面</h3>
+    <h3 style="margin:0 0 4px;font-size:16px"><svg class="ti" aria-hidden="true"><use href="#ti-install"/></svg>安裝到桌面</h3>
     <p class="muted" style="margin:4px 0 10px">裝起來像一般 App：開啟更快、全螢幕、可離線使用。</p>
-    <button class="btn full" onclick="doInstall()">📲 安裝 / 加到主畫面</button>
+    <button class="btn full" onclick="doInstall()"><svg class="ti" aria-hidden="true"><use href="#ti-install"/></svg>安裝 / 加到主畫面</button>
   </div>
   <div class="card" id="installedCard" style="display:none;border-color:var(--ok)">
     <p style="margin:0;font-weight:700"><span style="color:var(--ok)">✓</span> 已在 App 模式執行，隨時可離線使用 🎉</p>
   </div>
   <!-- 2026-10-13：資料備份移到設定頁最上方（原本在第 3 屏，走查找不到） -->
   <div class="card" id="backupCard">
-    <h3 style="margin:0 0 6px;font-size:16px">💾 資料備份</h3>
+    <h3 style="margin:0 0 6px;font-size:16px"><svg class="ti" aria-hidden="true"><use href="#ti-db"/></svg>資料備份</h3>
     <div id="backupInfo" class="muted" style="margin:0 0 10px;font-size:13px"></div>
     <p class="muted" style="margin:0 0 12px">錯題與照片全部存在這台裝置。定期匯出備份，換裝置可匯入（匯入會以較新的進度合併更新）。</p>
     <div class="row">
-      <button class="btn ghost sm" onclick="exportData()">⬆️ 匯出備份</button>
-      <button class="btn ghost sm" onclick="document.getElementById('importFile').click()">⬇️ 匯入</button>
+      <button class="btn ghost sm" onclick="exportData()"><svg class="ti" aria-hidden="true"><use href="#ti-download"/></svg>匯出備份</button>
+      <button class="btn ghost sm" onclick="document.getElementById('importFile').click()"><svg class="ti" aria-hidden="true"><use href="#ti-upload"/></svg>匯入</button>
     </div>
     <input type="file" id="importFile" accept="application/json" style="display:none" onchange="importData(this.files[0])">
     <div class="hr"></div>
-    <button class="btn bad sm full" onclick="wipeAll()">🗑️ 清空所有資料</button>
+    <button class="btn bad sm full" onclick="wipeAll()"><svg class="ti" aria-hidden="true"><use href="#ti-trash"/></svg>清空所有資料</button>
   </div>
   <div class="card">
-    <h3 style="margin:0 0 4px;font-size:16px">🤖 Gemini 辨識設定</h3>
+    <h3 style="margin:0 0 4px;font-size:16px"><svg class="ti" aria-hidden="true"><use href="#ti-sparkles"/></svg>Gemini 辨識設定</h3>
     <p class="muted" style="margin:4px 0 10px">拍照自動辨識題目、分類、生成解析。使用 Google Gemini（有免費額度）。</p>
     <label class="fld">API 金鑰</label>
     <input id="setApiKey" type="password" placeholder="貼上 Google AI Studio 的 API Key" autocomplete="off">
@@ -555,8 +655,8 @@ body.lite *{animation:none!important;transition:none!important}
       <option value="gemini-flash-latest">gemini-flash-latest</option>
     </select>
     <div class="row" style="margin-top:12px">
-      <button class="btn ghost sm" onclick="testKey()">🔌 測試連線</button>
-      <button class="btn sm" onclick="saveSettings()">💾 儲存</button>
+      <button class="btn ghost sm" onclick="testKey()"><svg class="ti" aria-hidden="true"><use href="#ti-plug"/></svg>測試連線</button>
+      <button class="btn sm" onclick="saveSettings()"><svg class="ti" aria-hidden="true"><use href="#ti-save"/></svg>儲存</button>
     </div>
     <div class="notice" style="margin-top:12px">
       🔑 金鑰完全<b>免費</b>（Gemini Flash 免費額度，學生用不完），只存在本機、不會外傳。不確定怎麼拿？看下方教學 👇
@@ -566,7 +666,7 @@ body.lite *{animation:none!important;transition:none!important}
     </div>
 
     <details class="guide">
-      <summary>📖 怎麼取得 Gemini 金鑰？（5 步驟）</summary>
+      <summary><span><svg class="ti" aria-hidden="true"><use href="#ti-info"/></svg>怎麼取得 Gemini 金鑰？（5 步驟）</span></summary>
       <div class="gbody">
         <div class="gstep"><div class="gn">1</div><div class="gt">用瀏覽器打開 <code>aistudio.google.com/apikey</code>，以 <b>Google 帳號</b>登入（Gmail 就可以）。</div></div>
         <div class="gstep"><div class="gn">2</div><div class="gt">按藍色的 <b>Create API key</b>（中文：<b>建立 API 金鑰</b>）；若問專案，選推薦的或建新專案。</div></div>
@@ -579,14 +679,14 @@ body.lite *{animation:none!important;transition:none!important}
   </div>
 
   <div class="card">
-    <h3 style="margin:0 0 4px;font-size:16px">🎯 學測日期</h3>
+    <h3 style="margin:0 0 4px;font-size:16px"><svg class="ti" aria-hidden="true"><use href="#ti-calendar"/></svg>學測日期</h3>
     <p class="muted" style="margin:4px 0 10px">設定後，首頁與統計會顯示倒數天數，幫你抓緊複習節奏。</p>
     <input id="setGsatDate" type="date" onchange="saveSettings()">
-    <label class="fld">🎨 外觀主題</label>
+    <label class="fld"><svg class="ti" aria-hidden="true"><use href="#ti-palette"/></svg>外觀主題</label>
     <select id="setTheme" onchange="saveSettings()">
       <option value="auto">跟隨系統（自動日夜）</option>
-      <option value="light">☀️ 淺色</option>
-      <option value="dark">🌙 深色</option>
+      <option value="light">淺色</option>
+      <option value="dark">深色</option>
     </select>
     <label class="fld" style="display:flex;align-items:center;gap:8px;margin-top:14px;cursor:pointer">
       <input id="setLite" type="checkbox" style="width:auto" onchange="saveSettings()">
@@ -595,7 +695,7 @@ body.lite *{animation:none!important;transition:none!important}
   </div>
 
   <div class="card">
-    <h3 style="margin:0 0 4px;font-size:16px">🔥 複習設定</h3>
+    <h3 style="margin:0 0 4px;font-size:16px"><svg class="ti" aria-hidden="true"><use href="#ti-flame"/></svg>複習設定</h3>
     <label class="fld">每日複習題數上限（避免一次爆量）</label>
     <select id="setDailyLimit" onchange="saveSettings()">
       <option value="0">不限制</option><option value="10">10 題</option><option value="20">20 題</option><option value="30">30 題</option><option value="50">50 題</option>
@@ -607,48 +707,55 @@ body.lite *{animation:none!important;transition:none!important}
   </div>
 
   <div class="card">
-    <h3 style="margin:0 0 4px;font-size:16px">📚 自訂科目</h3>
+    <h3 style="margin:0 0 4px;font-size:16px"><svg class="ti" aria-hidden="true"><use href="#ti-books"/></svg>自訂科目</h3>
     <p class="muted" style="margin:4px 0 8px">用逗號分隔，順序即顯示順序。文組可自己加史地公、刪自然。</p>
     <input id="setSubjects" placeholder="國文,英文,數學,自然,歷史,地理,公民,其他">
     <div class="row" style="margin-top:10px">
-      <button class="btn ghost sm" onclick="$('setSubjects').value='國文,英文,數學,自然,歷史,地理,公民,其他';saveSubjects()">↩ 預設</button>
-      <button class="btn sm" onclick="saveSubjects()">💾 套用科目</button>
+      <button class="btn ghost sm" onclick="$('setSubjects').value='國文,英文,數學,自然,歷史,地理,公民,其他';saveSubjects()"><svg class="ti" aria-hidden="true"><use href="#ti-back"/></svg>預設</button>
+      <button class="btn sm" onclick="saveSubjects()"><svg class="ti" aria-hidden="true"><use href="#ti-save"/></svg>套用科目</button>
     </div>
   </div>
 
   <div class="card">
-    <h3 style="margin:0 0 4px;font-size:16px">🗂️ 主題管理</h3>
+    <h3 style="margin:0 0 4px;font-size:16px"><svg class="ti" aria-hidden="true"><use href="#ti-folders"/></svg>主題管理</h3>
     <p class="muted" style="margin:4px 0 8px">整理 AI 產生的近義重複主題：改名或合併，也可整批刪除某主題的錯題。</p>
     <select id="mgTopic"><option value="">選一個主題…</option></select>
     <input id="mgNewName" placeholder="改成 / 合併到的名稱" style="margin-top:8px">
     <div class="row" style="margin-top:10px">
-      <button class="btn sm" onclick="renameTopic()">✏️ 改名 / 合併</button>
-      <button class="btn bad sm" onclick="deleteTopic()">🗑️ 刪這主題全部</button>
+      <button class="btn sm" onclick="renameTopic()"><svg class="ti" aria-hidden="true"><use href="#ti-pencil"/></svg>改名 / 合併</button>
+      <button class="btn bad sm" onclick="deleteTopic()"><svg class="ti" aria-hidden="true"><use href="#ti-trash"/></svg>刪這主題全部</button>
     </div>
-    <button class="btn ghost sm full" style="margin-top:8px" onclick="scanDupTopics()">🔍 偵測疑似重複主題</button>
+    <button class="btn ghost sm full" style="margin-top:8px" onclick="scanDupTopics()"><svg class="ti" aria-hidden="true"><use href="#ti-search"/></svg>偵測疑似重複主題</button>
     <div id="mgDup" class="muted" style="font-size:13px;margin-top:6px"></div>
   </div>
 
   <div class="card">
-    <h3 style="margin:0 0 4px;font-size:16px">🖨️ 列印 / 匯出錯題本</h3>
+    <h3 style="margin:0 0 4px;font-size:16px"><svg class="ti" aria-hidden="true"><use href="#ti-printer"/></svg>列印 / 匯出錯題本</h3>
     <p class="muted" style="margin:4px 0 10px">產生可列印的錯題本（依主題排列）。在列印畫面選「另存為 PDF」即可存檔。<br>範圍＝錯題本頁<b>目前的篩選</b>（想印全部請先按「✖ 清除」）。</p>
     <div class="row">
-      <button class="btn ghost sm" onclick="printBook(false)">📄 完整版（含答案）</button>
-      <button class="btn ghost sm" onclick="printBook(true)">📝 遮答案版（當考卷）</button>
+      <button class="btn ghost sm" onclick="printBook(false)"><svg class="ti" aria-hidden="true"><use href="#ti-file"/></svg>完整版（含答案）</button>
+      <button class="btn ghost sm" onclick="printBook(true)"><svg class="ti" aria-hidden="true"><use href="#ti-eyeoff"/></svg>遮答案版（當考卷）</button>
     </div>
   </div>
 
   <div class="card">
-    <h3 style="margin:0 0 6px;font-size:16px">ℹ️ 關於 / 更新</h3>
+    <h3 style="margin:0 0 6px;font-size:16px"><svg class="ti" aria-hidden="true"><use href="#ti-info"/></svg>關於 / 更新</h3>
     <p class="muted" style="margin:0 0 10px;line-height:1.7">
       錯題管理器 · 學測全科通用<br>
       目前版本：<b id="verLabel">—</b><br>
       離線可用，只有拍照辨識需連網。連對 3 次即畢業（精熟）。
     </p>
-    <button class="btn ghost sm full" onclick="checkUpdate()">🔄 檢查更新</button>
+    <button class="btn ghost sm full" onclick="checkUpdate()"><svg class="ti" aria-hidden="true"><use href="#ti-refresh"/></svg>檢查更新</button>
     <div class="muted" style="font-size:13px;margin-top:8px">有新版時，App 上方會自動跳出「立即更新」提示。</div>
   </div>
 </section>
+
+<!-- 安裝橫幅（2026-10-19 移到內容最下方：不和首屏主鈕搶第一眼；桌機仍浮在右下角） -->
+<div class="install-banner" id="installBanner">
+  <div class="txt"><b>把錯題本裝到桌面</b><br>像 App 一樣開，可離線使用</div>
+  <button class="bins" onclick="doInstall()">安裝</button>
+  <button class="bx" onclick="dismissInstall()" aria-label="關閉安裝提示">✕</button>
+</div>
 
 <footer class="rl-signature theme-denali">
   <div class="rl-sig-row">
@@ -667,10 +774,10 @@ body.lite *{animation:none!important;transition:none!important}
 
 <!-- 分頁列 -->
 <nav class="tabs">
-  <button class="on" data-p="list" onclick="go('list')"><span class="i"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5C4 4.67 4.67 4 5.5 4H12v16H5.5A1.5 1.5 0 0 1 4 18.5z"/><path d="M20 5.5c0-.83-.67-1.5-1.5-1.5H12v16h6.5c.83 0 1.5-.67 1.5-1.5z"/></svg></span>錯題本</button>
-  <button data-p="review" onclick="go('review')"><span class="i"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.5c1 2.5-1 3.5-1 5.5 0 1.2 1 2 2 2 1.3 0 2-1.2 1.7-2.5C16.5 9.5 18 12 18 14.5A6 6 0 1 1 6 14.5c0-2 1-3.7 2.3-5.2"/></svg></span>複習</button>
-  <button data-p="stats" onclick="go('stats')"><span class="i"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 20V10M12 20V4M19 20v-7"/></svg></span>統計</button>
-  <button data-p="settings" onclick="go('settings')"><span class="i"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 13.5a7.5 7.5 0 0 0 0-3l1.9-1.5-2-3.4-2.3.9a7.4 7.4 0 0 0-2.6-1.5L14 2.5h-4l-.4 2.5a7.4 7.4 0 0 0-2.6 1.5l-2.3-.9-2 3.4L4.6 10.5a7.5 7.5 0 0 0 0 3L2.7 15l2 3.4 2.3-.9c.8.7 1.6 1.2 2.6 1.5l.4 2.5h4l.4-2.5a7.4 7.4 0 0 0 2.6-1.5l2.3.9 2-3.4z"/></svg></span>設定</button>
+  <button class="on" data-p="list" onclick="go('list')"><span class="i"><img src="vendor/fluent-3d/book.png" alt="" width="26" height="26"></span>錯題本</button>
+  <button data-p="review" onclick="go('review')"><span class="i"><img src="vendor/fluent-3d/fire.png" alt="" width="26" height="26"></span>複習</button>
+  <button data-p="stats" onclick="go('stats')"><span class="i"><img src="vendor/fluent-3d/chart.png" alt="" width="26" height="26"></span>統計</button>
+  <button data-p="settings" onclick="go('settings')"><span class="i"><img src="vendor/fluent-3d/gear.png" alt="" width="26" height="26"></span>設定</button>
 </nav>
 
 <!-- ============ 新增/編輯 Modal ============ -->
@@ -682,11 +789,11 @@ body.lite *{animation:none!important;transition:none!important}
       <!-- 拍照區 -->
       <div id="photoBox" class="card" style="text-align:center;background:var(--bg);border-style:dashed">
         <div id="photoEmpty">
-          <div style="font-size:40px;margin-bottom:6px">📷</div>
+          <img src="vendor/fluent-3d/camera.png" alt="" width="56" height="56" style="display:block;margin:0 auto 6px">
           <p class="muted" style="margin:0 0 12px">拍下或選擇錯題照片，AI 幫你辨識</p>
           <div class="row" style="max-width:320px;margin:0 auto">
-            <button class="btn sm" onclick="document.getElementById('camIn').click()">📸 拍照</button>
-            <button class="btn ghost sm" onclick="document.getElementById('galIn').click()">🖼️ 選圖</button>
+            <button class="btn sm" onclick="document.getElementById('camIn').click()"><svg class="ti" aria-hidden="true"><use href="#ti-camera"/></svg>拍照</button>
+            <button class="btn ghost sm" onclick="document.getElementById('galIn').click()"><svg class="ti" aria-hidden="true"><use href="#ti-photo"/></svg>選圖</button>
           </div>
           <input type="file" id="camIn" accept="image/*" capture="environment" style="display:none" onchange="onPhoto(this.files[0])">
           <input type="file" id="galIn" accept="image/*" style="display:none" onchange="onPhoto(this.files[0])">
@@ -694,8 +801,8 @@ body.lite *{animation:none!important;transition:none!important}
         <div id="photoPreview" style="display:none">
           <img id="prevImg" style="width:100%;border-radius:12px;max-height:280px;object-fit:contain;background:#0008">
           <div class="row" style="margin-top:10px">
-            <button class="btn ghost sm" onclick="clearPhoto()">🔄 換一張</button>
-            <button class="btn sm" id="recogBtn" onclick="recognize()">✨ AI 辨識</button>
+            <button class="btn ghost sm" onclick="clearPhoto()"><svg class="ti" aria-hidden="true"><use href="#ti-refresh"/></svg>換一張</button>
+            <button class="btn sm" id="recogBtn" onclick="recognize()"><svg class="ti" aria-hidden="true"><use href="#ti-sparkles"/></svg>AI 辨識</button>
           </div>
           <div id="recogStatus" class="muted" style="margin-top:8px"></div>
         </div>
@@ -706,12 +813,12 @@ body.lite *{animation:none!important;transition:none!important}
       <!-- 表單 -->
       <label class="fld">科目 *</label>
       <div class="chips" id="fSubject"></div>
-      <label class="fld" style="color:var(--primary2);font-weight:800">🎯 主題 / 知識點（分類主軸，可加多個；第一個為主）</label>
+      <label class="fld" style="color:var(--primary2);font-weight:800"><svg class="ti" aria-hidden="true"><use href="#ti-target"/></svg>主題 / 知識點（分類主軸，可加多個；第一個為主）</label>
       <div class="chips" id="fTopicsChips" style="margin-bottom:6px"></div>
       <div class="row" style="gap:8px;align-items:stretch">
-        <input id="fChapter" list="topicList" placeholder="打字後按 Enter 加入，或按「📚 課綱」挑" style="flex:1" onkeydown="if(event.key==='Enter'){event.preventDefault();addTopicChip(this.value);this.value=''}">
+        <input id="fChapter" list="topicList" placeholder="打字後按 Enter 加入，或按「課綱」挑" style="flex:1" onkeydown="if(event.key==='Enter'){event.preventDefault();addTopicChip(this.value);this.value=''}">
         <button type="button" class="btn ghost sm" style="flex:none;width:76px;min-width:0" onclick="addTopicChip($('fChapter').value);$('fChapter').value=''">＋加入</button>
-        <button type="button" class="btn ghost sm" style="flex:none;width:76px;min-width:0" onclick="openTopicPicker()">📚 課綱</button>
+        <button type="button" class="btn ghost sm" style="flex:none;width:76px;min-width:0" onclick="openTopicPicker()"><svg class="ti" aria-hidden="true"><use href="#ti-books"/></svg>課綱</button>
       </div>
       <datalist id="topicList"></datalist>
       <div class="muted" style="font-size:13px;margin-top:4px">跨章綜合題可加多個知識點；之後任一標籤都篩得到、課綱覆蓋也都算。</div>
@@ -745,8 +852,8 @@ body.lite *{animation:none!important;transition:none!important}
     </div>
     <div class="save-bar">
       <button class="btn ghost" style="flex:none;width:64px" onclick="tryCloseModal('addModal')">取消</button>
-      <button class="btn ghost" id="saveAddBtn" style="flex:1" onclick="saveQuestion(true)">💾 存並續加</button>
-      <button class="btn" style="flex:1" onclick="saveQuestion()">💾 儲存</button>
+      <button class="btn ghost" id="saveAddBtn" style="flex:1" onclick="saveQuestion(true)"><svg class="ti" aria-hidden="true"><use href="#ti-save"/></svg>存並續加</button>
+      <button class="btn" style="flex:1" onclick="saveQuestion()"><svg class="ti" aria-hidden="true"><use href="#ti-save"/></svg>儲存</button>
     </div>
   </div>
 </div>
@@ -760,7 +867,7 @@ body.lite *{animation:none!important;transition:none!important}
 <div class="modal-bg" id="searchModal">
   <div class="modal">
     <div class="grabber"></div>
-    <input id="searchInput" placeholder="🔍 搜尋題目、解析、標籤…" oninput="doSearch()" style="font-size:16px">
+    <input id="searchInput" placeholder="搜尋題目、解析、標籤…" oninput="doSearch()" style="font-size:16px">
     <div id="searchResults" style="margin-top:14px"></div>
     <button class="btn ghost full" style="margin-top:12px" onclick="closeModal('searchModal')">關閉</button>
   </div>
@@ -1022,7 +1129,11 @@ function bumpStreak(){
   try{localStorage.setItem('cuoti_streak',JSON.stringify(streakData))}catch(e){}
 }
 function curStreak(){const t=ymd(new Date());const y=new Date();y.setDate(y.getDate()-1);return (streakData.last===t||streakData.last===ymd(y))?(streakData.count||0):0}
-function streakBadge(){return `<span class="pill" style="background:color-mix(in srgb,#f97316 22%,transparent);border-color:#f9731566">🔥 連續複習 ${curStreak()} 天</span>`}
+function streakBadge(){return `<span class="pill" style="background:color-mix(in srgb,#f97316 22%,transparent);border-color:#f9731566">${F3('fire',18,'f3i')}連續複習 ${curStreak()} 天</span>`}
+/* 2026-10-19：3D 圖（Fluent 3D）與線條圖示（Tabler sprite）的小工具 */
+function F3(k,w,cls){return `<img src="vendor/fluent-3d/${k}.png" alt="" width="${w}" height="${w}"${cls?` class="${cls}"`:''}>`}
+function TI(id){return `<svg class="ti" aria-hidden="true"><use href="#ti-${id}"/></svg>`}
+function starLbl(on){return TI(on?'star-f':'star')+'重點'}
 /* 學測倒數 */
 function renderCountdown(elId){
   const el=$(elId);if(!el)return;
@@ -1368,7 +1479,7 @@ function subjClass(s){return {'國文':'chi','英文':'eng','數學':'math','自
 let listView='group', listPage=1, starFilter=false, lastFiltered=[], listQuery='', groupBy='chapter', showAllWeak=false;
 const PAGE=60;
 function setGroupBy(v){groupBy=v;renderList();}
-function toggleStarFilter(){starFilter=!starFilter;const b=$('starToggle');b.classList.toggle('on',starFilter);b.textContent=starFilter?'★ 重點':'☆ 重點';renderList();}
+function toggleStarFilter(){starFilter=!starFilter;const b=$('starToggle');b.classList.toggle('on',starFilter);b.innerHTML=starLbl(starFilter);renderList();}
 function toggleFilterAdv(){const a=$('filterAdvanced');const open=a.style.display==='none';a.style.display=open?'block':'none';$('filterAdvBtn').classList.toggle('on',open);}
 function listSearchInput(){listQuery=normText($('listSearch').value.trim());renderList();}
 function statusMatch(q,status){
@@ -1383,15 +1494,15 @@ function clearFilters(){
   ['filterTopic','filterStatus','filterDiff','filterCause2','filterUnit','filterType','filterSource'].forEach(id=>{const e=$(id);if(e)e.value=''});
   if($('sortBy'))$('sortBy').value='new';
   if($('listSearch'))$('listSearch').value='';
-  const sb=$('starToggle');if(sb){sb.classList.remove('on');sb.textContent='☆ 重點'}
+  const sb=$('starToggle');if(sb){sb.classList.remove('on');sb.innerHTML=starLbl(false)}
   initFilters();renderList();
 }
 const FKEYS=['filterTopic','filterStatus','sortBy','filterDiff','filterCause2','filterUnit','filterType','filterSource'];
 function saveFilterState(){try{const st={sub:curSubjFilter,star:starFilter,q:$('listSearch')?$('listSearch').value:'',gb:groupBy,view:listView};FKEYS.forEach(k=>st[k]=($(k)||{}).value||'');localStorage.setItem('cuoti_filter',JSON.stringify(st));}catch(e){}}
-function loadFilterState(){try{const st=JSON.parse(localStorage.getItem('cuoti_filter')||'null');if(!st)return;curSubjFilter=st.sub||'';starFilter=!!st.star;groupBy=st.gb||'chapter';listView=st.view||'group';if($('listSearch')){$('listSearch').value=st.q||'';listQuery=normText(st.q||'');}FKEYS.forEach(k=>{if($(k)&&st[k]!=null)$(k).value=st[k];});if($('groupBySel'))$('groupBySel').value=groupBy;document.querySelectorAll('#viewSeg button').forEach(b=>b.classList.toggle('on',b.dataset.v===listView));const sb=$('starToggle');if(sb){sb.classList.toggle('on',starFilter);sb.textContent=starFilter?'★ 重點':'☆ 重點'}}catch(e){}}
+function loadFilterState(){try{const st=JSON.parse(localStorage.getItem('cuoti_filter')||'null');if(!st)return;curSubjFilter=st.sub||'';starFilter=!!st.star;groupBy=st.gb||'chapter';listView=st.view||'group';if($('listSearch')){$('listSearch').value=st.q||'';listQuery=normText(st.q||'');}FKEYS.forEach(k=>{if($(k)&&st[k]!=null)$(k).value=st[k];});if($('groupBySel'))$('groupBySel').value=groupBy;document.querySelectorAll('#viewSeg button').forEach(b=>b.classList.toggle('on',b.dataset.v===listView));const sb=$('starToggle');if(sb){sb.classList.toggle('on',starFilter);sb.innerHTML=starLbl(starFilter)}}catch(e){}}
 function getPresets(){try{return JSON.parse(localStorage.getItem('cuoti_presets')||'[]')}catch(e){return []}}
 function savecurPreset(){const name=prompt('把目前篩選存成常用組合，取個名字：');if(name==null)return;const nm=name.trim();if(!nm)return;const st={sub:curSubjFilter,star:starFilter,q:$('listSearch').value,gb:groupBy,view:listView};FKEYS.forEach(k=>st[k]=($(k)||{}).value||'');const ps=getPresets().filter(p=>p.name!==nm);ps.push({name:nm,st});localStorage.setItem('cuoti_presets',JSON.stringify(ps.slice(-6)));renderPresets();toast('已存常用「'+nm+'」');}
-function applyPreset(i){const p=getPresets()[i];if(!p)return;const st=p.st;curSubjFilter=st.sub||'';starFilter=!!st.star;groupBy=st.gb||'chapter';listView=st.view||'group';initFilters();FKEYS.forEach(k=>{if($(k)&&st[k]!=null)$(k).value=st[k]});if($('listSearch')){$('listSearch').value=st.q||'';listQuery=normText(st.q||'')}if($('groupBySel'))$('groupBySel').value=groupBy;document.querySelectorAll('#viewSeg button').forEach(b=>b.classList.toggle('on',b.dataset.v===listView));const sb=$('starToggle');if(sb){sb.classList.toggle('on',starFilter);sb.textContent=starFilter?'★ 重點':'☆ 重點'}renderList();}
+function applyPreset(i){const p=getPresets()[i];if(!p)return;const st=p.st;curSubjFilter=st.sub||'';starFilter=!!st.star;groupBy=st.gb||'chapter';listView=st.view||'group';initFilters();FKEYS.forEach(k=>{if($(k)&&st[k]!=null)$(k).value=st[k]});if($('listSearch')){$('listSearch').value=st.q||'';listQuery=normText(st.q||'')}if($('groupBySel'))$('groupBySel').value=groupBy;document.querySelectorAll('#viewSeg button').forEach(b=>b.classList.toggle('on',b.dataset.v===listView));const sb=$('starToggle');if(sb){sb.classList.toggle('on',starFilter);sb.innerHTML=starLbl(starFilter)}renderList();}
 function delPreset(i){const ps=getPresets();ps.splice(i,1);localStorage.setItem('cuoti_presets',JSON.stringify(ps));renderPresets();}
 function renderPresets(){const el=$('presetBar');if(!el)return;const ps=getPresets();el.innerHTML='<div class="chip" onclick="savecurPreset()" style="border-style:dashed">＋ 存目前篩選</div>'+ps.map((p,i)=>`<div class="chip" onclick="applyPreset(${i})">${esc(p.name)} <span onclick="event.stopPropagation();delPreset(${i})" style="opacity:.6;font-weight:800">×</span></div>`).join('');}
 /* 近期正確率 */
@@ -1416,54 +1527,74 @@ function currentFilteredList(){
 }
 function gsatDays(){const d=settings.gsatDate;if(!d)return null;return Math.ceil((new Date(d+'T00:00:00').getTime()-today())/86400000)}
 function renderMotivate(){
+  /* 2026-10-19「修練手帳」首屏：HUD 狀態列＋主視覺（今天幾題待複習＋唯一金色主鈕）＋3D 功能圖格 */
   const el=$('listMotivate');if(!el)return;
   if(!DATA.length){el.innerHTML='';return}
   const due=DATA.filter(dueForReview).length, mastered=DATA.filter(q=>q.mastered).length, s=curStreak(), gd=gsatDays();
-  const unm=DATA.filter(q=>!q.mastered&&!q.retired).length;
+  const unm=DATA.filter(q=>!q.mastered&&!q.retired).length, total=DATA.length;
   const pace=(gd!=null&&gd>0&&unm>0)?Math.ceil(unm/gd):0;
-  const cd=(gd!=null&&gd>=0)?`<span class="pill" style="font-size:13px;padding:3px 9px">🎯 學測 ${gd} 天</span> `:'';
-  const pc=pace?`<span class="pill" style="font-size:13px;padding:3px 9px">📈 尚 ${unm} 未精熟·每天約 ${pace} 題可過完</span>`:'';
-  el.innerHTML=`<div class="card" style="display:flex;align-items:center;gap:11px;padding:10px 13px">
-    <div style="text-align:center;min-width:40px"><div style="font-size:22px;font-weight:800;color:#f97316;line-height:1">${s}</div><div class="muted" style="font-size:13px">🔥天</div></div>
-    <div style="flex:1;min-width:0">
-      ${due?`<div style="font-weight:700;font-size:14.5px">今天 ${due} 題待複習</div>`:`<div style="font-weight:700;font-size:14.5px;color:var(--ok)">今日複習完成 🎉</div>`}
-      <div style="margin-top:3px;line-height:1.9">${cd}${pc}</div>
+  const pct=total?Math.round(mastered/total*100):0;
+  const kicker='修練手帳'+((gd!=null&&gd>=0)?` · 學測倒數 ${gd} 天`:'');
+  const sub=pace?`尚 ${unm} 題未精熟，每天約 ${pace} 題就能在學測前過完。`:(due?'先遮住答案自己想，連對 3 次就畢業。':(unm?`還有 ${unm} 題在排程中，明天見。`:'目前沒有待複習的錯題，繼續收集新的錯題吧。'));
+  const title=due?`今天 <span class="n">${due}</span> 題<br>待複習`:'今日複習<br>完成';
+  const goBtn=due?`<button class="btn go" id="heroGo" onclick="go('review')">${F3('fire',28)}<span class="lbl">開始複習</span></button>`
+                 :`<button class="btn go" id="heroGo" onclick="openAdd()">${F3('pencil',28)}<span class="lbl">再加一題錯題</span></button>`;
+  el.innerHTML=`<div class="top7">
+    <div class="hero7" role="region" aria-label="今日修練">
+      <div class="k">${kicker}</div>
+      <h2 id="heroTitle">${title}</h2>
+      <p>${sub}</p>
+      <div class="xp" role="progressbar" aria-label="精熟進度" aria-valuemin="0" aria-valuemax="${total}" aria-valuenow="${mastered}"><i style="width:${pct}%"></i></div>
+      <div class="xpl">已精熟 ${mastered} / ${total} 題</div>
+      <div class="acts">${goBtn}</div>
+      <div class="art" aria-hidden="true">${F3('book',128,'a1')}${F3('pencil',96,'a2')}</div>
     </div>
-    ${due?`<button class="btn sm" style="flex:none" onclick="go('review')">去複習</button>`:''}
+    <div class="side7">
+      <div class="hud7" role="group" aria-label="修練狀態">
+        <div class="h">${F3('fire',28)}<span class="v"><b>${s}</b><span class="l">連續天數</span></span></div>
+        <div class="h">${F3('book',28)}<span class="v"><b>${total}</b><span class="l">已存錯題</span></span></div>
+        <div class="h">${F3('grad',28)}<span class="v"><b>${mastered}/${total}</b><span class="l">已精熟</span></span></div>
+      </div>
+      <div class="tiles7">
+        <button onclick="openAdd()">${F3('camera',48)}<span class="tl">新增錯題<small>拍照或手打</small></span></button>
+        <button onclick="openMock()">${F3('stopwatch',48)}<span class="tl">限時模擬<small>交卷自動計分</small></span></button>
+        <button onclick="go('stats')">${F3('chart',48)}<span class="tl">弱點分析<small>錯最多的主題</small></span></button>
+        <button onclick="openSearch()">${F3('search',48)}<span class="tl">搜尋<small>題目、解析、標籤</small></span></button>
+      </div>
+    </div>
   </div>`;
 }
 function welcomeHTML(){
-  const ic=(d)=>`<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>`;
-  const pen=ic('<path d="M4 20l1-4L16.5 4.5a2 2 0 0 1 3 3L8 19z"/><path d="M14.5 6.5l3 3"/>');
-  const cam=ic('<path d="M4 8h3l1.5-2h7L17 8h3v11H4z"/><circle cx="12" cy="13" r="3.5"/>');
-  const book=`<svg viewBox="0 0 24 24" width="34" height="34" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5.5C4 4.67 4.67 4 5.5 4H12v16H5.5A1.5 1.5 0 0 1 4 18.5z"/><path d="M20 5.5c0-.83-.67-1.5-1.5-1.5H12v16h6.5c.83 0 1.5-.67 1.5-1.5z"/></svg>`;
   const total=DATA.length, mastered=DATA.filter(q=>q.mastered).length, due=DATA.filter(dueForReview).length, st=curStreak();
-  return `<div class="welcome">
-    <div class="card hero">
-      <div class="w-icon">${book}</div>
-      <h2>開始建立你的錯題本</h2>
-      <p class="muted">手打就能用，不用任何設定；想更快可拍照讓 AI 自動辨識。</p>
-      <div class="cta">
-        <button class="btn full" onclick="openAdd()">${pen} 手動加第一題</button>
-        <button class="btn ghost full" onclick="go('settings')">${cam} 設定拍照辨識（免費）</button>
+  return `<div class="welcome top7">
+    <div class="hero7" role="region" aria-label="開始使用">
+      <div class="k">修練手帳 · 第一頁</div>
+      <h2 id="heroTitle">開始建立<br>你的錯題本</h2>
+      <p>手打就能用，不用任何設定；想更快可拍照讓 AI 自動辨識。</p>
+      <div class="acts col">
+        <button class="btn go" id="heroGo" onclick="openAdd()">${F3('pencil',28)}<span class="lbl">手動加第一題</span></button>
+        <button class="btn cta2" onclick="go('settings')">${TI('camera')}<span class="lbl">設定拍照辨識（免費）</span></button>
       </div>
+      <div class="art" aria-hidden="true">${F3('book',128,'a1')}${F3('pencil',96,'a2')}</div>
     </div>
-    <div class="card">
-      <h3 class="sec-h">我的進度</h3>
-      <div class="stat-grid">
-        <div class="stat"><div class="n">${total}</div><div class="l">已存錯題</div></div>
-        <div class="stat"><div class="n">${due}</div><div class="l">今日待複習</div></div>
-        <div class="stat"><div class="n">${st}</div><div class="l">連續天數</div></div>
+    <div class="side7">
+      <div class="card">
+        <h3 class="sec-h">我的進度</h3>
+        <div class="stat-grid">
+          <div class="stat"><div class="n">${total}</div><div class="l">已存錯題</div></div>
+          <div class="stat"><div class="n">${due}</div><div class="l">今日待複習</div></div>
+          <div class="stat"><div class="n">${st}</div><div class="l">連續天數</div></div>
+        </div>
+        <div class="prog"><span>已精熟 ${mastered} / ${total} 題</span><div class="bar-wrap" role="progressbar" aria-label="精熟進度" aria-valuemin="0" aria-valuemax="${total}" aria-valuenow="${mastered}"><div class="bar-fill" style="width:${total?Math.round(mastered/total*100):0}%;background:var(--primary)"></div></div></div>
       </div>
-      <div class="prog"><span>已精熟 ${mastered} / ${total} 題</span><div class="bar-wrap" role="progressbar" aria-label="精熟進度" aria-valuemin="0" aria-valuemax="${total}" aria-valuenow="${mastered}"><div class="bar-fill" style="width:${total?Math.round(mastered/total*100):0}%;background:var(--primary)"></div></div></div>
-    </div>
-    <div class="card">
-      <h3 class="sec-h">三步驟開始</h3>
-      <ol class="steps">
-        <li><span class="gn">1</span><span><b>加入錯題</b>：手打，或拍照讓 AI 辨識題目與解析。</span></li>
-        <li><span class="gn">2</span><span><b>自動分類</b>：依「主題／知識點」整理，之後能搜尋、篩選。</span></li>
-        <li><span class="gn">3</span><span><b>間隔複習</b>：連對三次就畢業，也能印成考卷反覆練。</span></li>
-      </ol>
+      <div class="card">
+        <h3 class="sec-h">三步驟開始</h3>
+        <ol class="steps">
+          <li>${F3('pencil',36)}<span><b>加入錯題</b>：手打，或拍照讓 AI 辨識題目與解析。</span></li>
+          <li>${F3('book',36)}<span><b>自動分類</b>：依「主題／知識點」整理，之後能搜尋、篩選。</span></li>
+          <li>${F3('fire',36)}<span><b>間隔複習</b>：連對三次就畢業，也能印成考卷反覆練。</span></li>
+        </ol>
+      </div>
     </div>
   </div>`;
 }
@@ -1482,7 +1613,7 @@ function renderList(){
   if(fc)fc.style.display='';
   const list=currentFilteredList();lastFiltered=list;
   const dueInFilter=list.filter(q=>!q.mastered).length;
-  if(rfb){rfb.style.display=dueInFilter?'block':'none';rfb.textContent='🔥 複習目前篩選的這些題 ('+dueInFilter+')';}
+  if(rfb){rfb.style.display=dueInFilter?'flex':'none';rfb.querySelector('.lbl').textContent='複習目前篩選的這些題 ('+dueInFilter+')';}
   if(!list.length){area.innerHTML=emptyHTML('沒有符合的錯題','換個篩選條件試試');if(more)more.innerHTML='';return}
   if(listView==='group'){
     if(more)more.innerHTML='';
@@ -1505,7 +1636,7 @@ function renderList(){
       const items=groups[k];
       const due=items.filter(q=>!q.mastered).length;
       const dot=bySubjKey?`<span class="dot" style="background:var(--s-${subjClass(subj)});flex:none"></span>`:'';
-      const rbtn=(bySubjKey&&groupBy==='chapter'&&due)?`<button class="btn sm" style="padding:5px 11px;font-size:13px;flex:none" onclick="reviewTopic('${esc(subj)}','${esc(gtopic==='未分類'?'':gtopic)}')">🔥 複習這主題 ${due}</button>`:(due?`<button class="btn sm" style="padding:5px 11px;font-size:13px;flex:none" onclick="reviewGroupList(${JSON.stringify(items.filter(q=>!q.mastered).map(q=>q.id)).replace(/"/g,'&quot;')})">🔥 複習這組 ${due}</button>`:'<span class="mastered-badge">✓ 全精熟</span>');
+      const rbtn=(bySubjKey&&groupBy==='chapter'&&due)?`<button class="btn line sm" style="padding:5px 11px;font-size:13px;flex:none" onclick="reviewTopic('${esc(subj)}','${esc(gtopic==='未分類'?'':gtopic)}')">${TI('flame')}複習這主題 ${due}</button>`:(due?`<button class="btn line sm" style="padding:5px 11px;font-size:13px;flex:none" onclick="reviewGroupList(${JSON.stringify(items.filter(q=>!q.mastered).map(q=>q.id)).replace(/"/g,'&quot;')})">${TI('flame')}複習這組 ${due}</button>`:'<span class="mastered-badge">✓ 全精熟</span>');
       return `<div style="margin:16px 4px 8px;display:flex;align-items:center;gap:8px;flex-wrap:wrap">
         ${dot}<b style="font-size:15px">${esc(k)}</b><span class="muted" style="font-size:13px">（${items.length}）</span>
         <span style="flex:1;min-width:20px"></span>${rbtn}</div>`
@@ -1791,11 +1922,11 @@ function reviewHeader(){
       <span class="muted" style="font-size:13px">${esc(scopeLabel())}</span>
     </div>
     <div class="row" style="gap:6px;margin-top:8px;flex-wrap:wrap">
-      <button class="${sc(null)} sm" style="flex:1;min-width:80px;padding:6px 8px;font-size:13px" onclick="reviewToday()">📅 今日</button>
-      <button class="${sc('all')} sm" style="flex:1;min-width:80px;padding:6px 8px;font-size:13px" onclick="reviewAll()">🔁 全部 ${allN}</button>
-      ${cramN?`<button class="${sc('cram')} sm" style="flex:1;min-width:80px;padding:6px 8px;font-size:13px" onclick="reviewCram()">⚡ 難+頑固 ${cramN}</button>`:''}
-      ${leechN?`<button class="${sc('leech')} sm" style="flex:1;min-width:80px;padding:6px 8px;font-size:13px" onclick="reviewLeech()">🔴 頑固 ${leechN}</button>`:''}
-      <button class="btn ghost sm" style="flex:1;min-width:80px;padding:6px 8px;font-size:13px" onclick="openMock()">⏱ 限時模擬</button>
+      <button class="${sc(null)} sm" style="flex:1;min-width:80px;padding:6px 8px;font-size:13px" onclick="reviewToday()">${TI('calendar')}今日</button>
+      <button class="${sc('all')} sm" style="flex:1;min-width:80px;padding:6px 8px;font-size:13px" onclick="reviewAll()">${TI('repeat')}全部 ${allN}</button>
+      ${cramN?`<button class="${sc('cram')} sm" style="flex:1;min-width:80px;padding:6px 8px;font-size:13px" onclick="reviewCram()">${TI('bolt')}難+頑固 ${cramN}</button>`:''}
+      ${leechN?`<button class="${sc('leech')} sm" style="flex:1;min-width:80px;padding:6px 8px;font-size:13px" onclick="reviewLeech()">${TI('alert')}頑固 ${leechN}</button>`:''}
+      <button class="btn ghost sm" style="flex:1;min-width:80px;padding:6px 8px;font-size:13px" onclick="openMock()">${TI('clock')}限時模擬</button>
     </div>${subjChips}
   </div>`;
 }
@@ -1808,7 +1939,7 @@ function showReviewCard(){
     area.innerHTML=reviewHeader()+`<div class="empty"><div class="empty-icon" style="color:var(--ok)"><svg viewBox="0 0 24 24" width="34" height="34" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m8.5 12.5 2.5 2.5 5-5"/></svg></div>
       <div style="font-size:17px;font-weight:700;color:var(--txt)">${(reviewScope||reviewSubj)?'這個範圍完成！':'今日進度完成！'}</div>
       <div style="margin-top:6px">${dueMore?`還有 ${dueMore} 題今天到期（可到設定調高每日上限）`:(upcoming?`還有 ${upcoming} 題在排程中，明天見`:'目前沒有待複習的錯題 🎊')}</div>
-      ${upcoming?`<button class="btn ghost" style="margin-top:16px" onclick="reviewAll()">🔁 複習全部未精熟</button>`:''}</div>`;
+      ${upcoming?`<button class="btn ghost" style="margin-top:16px" onclick="reviewAll()">${TI('repeat')}複習全部未精熟</button>`:''}</div>`;
     return;
   }
   if(reviewIdx>=reviewQueue.length){buildReviewQueue();return}
@@ -2238,7 +2369,7 @@ async function init(){
 }
 
 /* ================= 版本更新機制 ================= */
-const APP_VERSION='14.8（2026-10-13 返回鍵回上一層、資料備份移到設定頁頂端）';
+const APP_VERSION='14.9（2026-10-19 版面美化「修練手帳」）';
 let swReg=null, swRefreshing=false;
 function showUpdateBanner(){$('updateBanner').classList.add('show')}
 function registerSW(){

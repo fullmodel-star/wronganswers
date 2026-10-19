@@ -244,6 +244,13 @@ try {
   ok('1.1 頁面載入完成（init 跑完、#listArea 有內容）', await c.open(BASE));
   ok('1.2 沒有任何資料時顯示「開始建立你的錯題本」空狀態，篩選卡隱藏',
     await c.eval(`document.getElementById('listArea').textContent.includes('開始建立你的錯題本') && getComputedStyle(document.getElementById('filterCard')).display==='none'`));
+  // 2026-10-19 修練手帳：空狀態也是主視覺卡，裡面只有一顆金色主鈕；安裝橫幅（強制顯示）不可排在主鈕前面（評審 U1 扣分點）
+  const w0 = await c.eval(`(()=>{const ib=document.getElementById('installBanner'); ib.classList.add('show');
+    const h=document.querySelector('#listArea .hero7'); const go=h&&h.querySelectorAll('.btn.go'); const g=go&&go[0];
+    const r=g&&g.getBoundingClientRect(), b=ib.getBoundingClientRect(); const out={hero:!!h, goN:go?go.length:0, goTxt:g?g.textContent.trim():'', goBottom:r?Math.round(r.bottom):null, bannerTop:Math.round(b.top), vh:innerHeight};
+    ib.classList.remove('show'); return out})()`);
+  ok('1.2b 空狀態主視覺：唯一金色主鈕「手動加第一題」在首屏內，安裝橫幅排在它之後（' + J(w0) + '）',
+    w0.hero && w0.goN === 1 && w0.goTxt === '手動加第一題' && w0.goBottom < w0.vh - 70 && w0.bannerTop > w0.goBottom, w0);
   const db0 = await idb();
   ok('1.3 App 已建立 IndexedDB cuotiDB/questions 且是空的（實際 ' + (db0 ? db0.length : 'null') + ' 筆）', Array.isArray(db0) && db0.length === 0, db0);
   // 第一次造訪：sw.js activate 時 clients.claim() 會觸發 controllerchange；舊版直接 reload＝新使用者打開 1～2 秒後頁面自己重整。
@@ -542,6 +549,110 @@ try {
     await clickBtn('#addModal .save-bar', '取消');
   }
   await c.width(390);
+
+  /* ───────── 13 版面美化「修練手帳」2026-10-19 ───────── */
+  console.log('\n[13 修練手帳：首屏主視覺、粉圓字型、3D 圖、圖示一套、桌機兩欄]');
+  await c.open(BASE);
+  // 今天待複習題數：直接由 IndexedDB 算（不呼叫 App 的 dueForReview），與主視覺標題比對
+  const all13 = (await idb()) || [];
+  const t13 = await today();
+  const due13 = all13.filter((q) => !q.retired && (q.nextReview || 0) <= t13 && (!q.mastered || (q.maint != null && q.maint < 3))).length;
+  const h13 = await c.eval(`(()=>{const h=document.querySelector('#listMotivate .hero7'); if(!h) return null; const r=h.getBoundingClientRect(); const g=h.querySelector('.btn.go'); const gr=g.getBoundingClientRect();
+    return {title:document.getElementById('heroTitle').textContent.replace(/\\s+/g,' ').trim(), inHeader:!!h.closest('header'), top:Math.round(r.top), goBottom:Math.round(gr.bottom), vh:innerHeight,
+      goInHero:h.querySelectorAll('.btn.go').length, goOnPage:[...document.querySelectorAll('#page-list .btn.go')].filter(b=>b.offsetParent).length, goTxt:g.textContent.trim()}})()`);
+  const want13 = due13 ? `今天 ${due13} 題待複習` : '今日複習完成';
+  ok('13.1 手機首屏主視覺：標題「' + want13 + '」與 IndexedDB 算出的到期題數一致（' + all13.length + ' 題中 ' + due13 + ' 題到期），不在黏住的頁首裡',
+    !!h13 && h13.title === want13 && !h13.inHeader && h13.top < 260, h13);
+  ok('13.2 唯一主行動：錯題本頁只有一顆金色主鈕（' + (h13 && h13.goTxt) + '），且整顆在第一屏、不被底部分頁蓋住',
+    !!h13 && h13.goInHero === 1 && h13.goOnPage === 1 && h13.goBottom < h13.vh - 70, h13);
+  // 舊版沒有主視覺時，後面各項各自判失敗、不讓整支測試中斷（反向測試要看得到每一項）
+  const safe = async (f, d) => { try { return await f(); } catch { return d; } };
+  await safe(() => c.eval(`document.getElementById('heroGo').click()`));
+  const went13 = due13 ? await c.until(`document.getElementById('page-review').classList.contains('on')`, 3000)
+    : await c.until(`document.getElementById('addModal').classList.contains('on')`, 3000);
+  ok('13.3 按主鈕真的帶到' + (due13 ? '複習頁' : '新增視窗'), went13);
+  if (!due13) await clickBtn('#addModal .save-bar', '取消');
+  await goTab('list');
+  const ib13 = await safe(() => c.eval(`(()=>{const ib=document.getElementById('installBanner'); ib.classList.add('show'); const g=document.getElementById('heroGo').getBoundingClientRect(); const b=ib.getBoundingClientRect(); ib.classList.remove('show'); return {goBottom:Math.round(g.bottom), bannerTop:Math.round(b.top)}})()`), {});
+  ok('13.4 手機安裝橫幅（強制顯示）排在主鈕之後，不和主鈕搶第一眼', ib13.bannerTop > ib13.goBottom, ib13);
+  await c.eval(`document.fonts.ready`);
+  const font13 = await c.until(`[...document.fonts].some(f=>f.family.replace(/"/g,'')==='WBRound' && f.status==='loaded')`, 5000);
+  const fam13 = await c.eval(`['#heroTitle','nav.tabs button','.tiles7 button','.rl-title','#filterAdvBtn'].map(s=>!document.querySelector(s)?'(無 '+s+')':getComputedStyle(document.querySelector(s)).fontFamily.split(',')[0].replace(/"/g,'').trim())`);
+  ok('13.5 粉圓子集字型（WBRound）有載入，主視覺標題／分頁／圖格／App 名／按鈕都用它（' + fam13.join('、') + '）', font13 && fam13.every((f) => f === 'WBRound'), fam13);
+  // 不用 img.complete（lazy 圖會假失敗）：把頁面上用到的每個 3D 圖檔都實際載入一次
+  const f13 = await c.eval(`(async()=>{const srcs=[...new Set([...document.querySelectorAll('img[src*="fluent-3d"]')].map(i=>i.getAttribute('src')))];
+    const res=await Promise.all(srcs.map(s=>new Promise(ok=>{const im=new Image(); im.onload=()=>ok(im.naturalWidth>0?null:s); im.onerror=()=>ok(s); im.src=s;})));
+    return {n:srcs.length, srcs, broken:res.filter(Boolean)}})()`);
+  ok('13.6 用到的 3D 圖檔（' + f13.n + ' 種）全部載得出來', f13.n >= 9 && f13.broken.length === 0, f13);
+  const swText = await (await fetch(BASE + 'sw.js')).text();
+  const notCached = [...f13.srcs, 'vendor/round-ui/wb-round.woff2'].filter((s) => !swText.includes("'./" + s.replace(/^\.\//, '') + "'"));
+  ok('13.7 新檔（字型＋' + f13.n + ' 張 3D 圖）都在 sw 預先快取清單裡', notCached.length === 0, notCached);
+  const art13 = async () => c.eval(`(()=>{const h=document.querySelector('.hero7'); if(!h) return ['（沒有主視覺）']; const a=h.querySelector('.art').getBoundingClientRect();
+    // 文字量的是字實際占的範圍（Range），不是區塊盒子（區塊元素寬度永遠撐滿整列）；進度條與按鈕量元素本身
+    const box=e=>{if(e.matches('.xp,.btn'))return e.getBoundingClientRect(); const rg=document.createRange(); rg.selectNodeContents(e); return rg.getBoundingClientRect()};
+    const hit=[...h.querySelectorAll('.k,h2,p,.xp,.xpl,.acts .btn')].map(e=>[e.className||e.tagName,box(e)]).filter(([n,r])=>r.width&&!(r.right<=a.left||r.left>=a.right||r.bottom<=a.top||r.top>=a.bottom)).map(([n])=>n);
+    return hit})()`);
+  for (const w of [360, 390]) { await c.width(w); await sleep(150); const hit = await art13(); ok(`13.8.${w} ${w}px 主視覺 3D 插圖不壓到任何文字或按鈕`, hit.length === 0, hit); }
+  // 操作元件文字不可有彩色 emoji（同一組入口不可混用 emoji 與線條圖示）
+  const EMO = `/\\p{Extended_Pictographic}/u`;
+  await c.width(390);
+  const emo13 = await c.eval(`(()=>{const sel='header button,nav.tabs button,.sidebar button,#filterCard button,#batchBar button,.top7 button,#page-stats .card>h3,#page-settings .card>h3,#page-settings button';
+    return [...document.querySelectorAll(sel)].map(e=>e.textContent.trim()).filter(t=>${EMO}.test(t))})()`);
+  const n13 = await c.eval(`document.querySelectorAll('header button,nav.tabs button,.sidebar button,#filterCard button,#batchBar button,.top7 button,#page-stats .card>h3,#page-settings .card>h3,#page-settings button').length`);
+  ok('13.9 錯題本／統計／設定頁的操作元件與卡片標題沒有彩色 emoji（掃 ' + n13 + ' 個）', n13 >= 40 && emo13.length === 0, emo13);
+  await goTab('review');
+  await c.until(`document.getElementById('reviewArea').children.length>0`, 3000);
+  const emoR = await c.eval(`[...document.querySelectorAll('#reviewArea > .card:first-child button')].map(e=>e.textContent.trim())`);
+  ok('13.10 複習頁範圍按鈕（' + emoR.length + ' 顆）沒有彩色 emoji、改用線條圖示', emoR.length >= 3 && emoR.every((t) => !new RegExp('\\p{Extended_Pictographic}', 'u').test(t)) &&
+    await c.eval(`document.querySelectorAll('#reviewArea > .card:first-child button svg.ti').length`) === emoR.length, emoR);
+  await goTab('list');
+  // 桌機：主視覺與右欄（狀態列＋圖格）並排，不是中間一條窄欄；錯題本頁下方不可露出統計頁
+  await c.width(1440, 900);
+  await c.open(BASE);
+  const d13 = await safe(() => c.eval(`(()=>{const h=document.querySelector('.top7 .hero7').getBoundingClientRect(), s=document.querySelector('.top7 .side7').getBoundingClientRect(), w=document.querySelector('.wrap').getBoundingClientRect();
+    return {heroL:Math.round(h.left), heroR:Math.round(h.right), heroT:Math.round(h.top), sideL:Math.round(s.left), sideT:Math.round(s.top), wrapW:Math.round(w.width), statsDisp:getComputedStyle(document.getElementById('page-stats')).display,
+      hscroll:document.documentElement.scrollWidth>innerWidth+1}})()`), {});
+  d13.statsDisp = await c.eval(`getComputedStyle(document.getElementById('page-stats')).display`);
+  ok('13.11 1440px：主視覺在左、狀態列與圖格在右並排（內容寬 ' + d13.wrapW + 'px），沒有水平捲動',
+    d13.sideL >= d13.heroR && Math.abs(d13.sideT - d13.heroT) <= 4 && d13.wrapW >= 1000 && !d13.hscroll, d13);
+  ok('13.12 1440px：在錯題本頁時統計頁不顯示（舊版 #page-stats{display:grid} 蓋過隱藏）', d13.statsDisp === 'none', d13.statsDisp);
+  const art1440 = await art13();
+  ok('13.13 1440px 主視覺 3D 插圖不壓到任何文字或按鈕', art1440.length === 0, art1440);
+  // 審查修（2026-10-19）：桌機＋鈕與安裝橫幅（強制顯示）不可蓋住任何按鈕——整頁從上捲到下逐段檢查
+  for (const w of [1440, 1100]) {
+    await c.width(w, 900);
+    await c.open(BASE);
+    const ov = await c.eval(`(async()=>{const ib=document.getElementById('installBanner'); ib.classList.add('show');
+      const fl=[document.getElementById('fab'), ib]; const hits=[]; let steps=0, nBtn=0;
+      const max=document.documentElement.scrollHeight-innerHeight;
+      for(let y=0;;y=Math.min(max,y+60)){ window.scrollTo(0,y); await new Promise(r=>requestAnimationFrame(()=>r())); steps++;
+        const btns=[...document.querySelectorAll('#page-list button, .rl-signature button')].filter(b=>b.offsetParent && !fl.some(f=>f.contains(b)));
+        nBtn=Math.max(nBtn,btns.length);
+        for(const f of fl){ const a=f.getBoundingClientRect(); if(!a.width||!a.height||getComputedStyle(f).display==='none') continue;
+          for(const b of btns){ const r=b.getBoundingClientRect(); if(r.width&&!(r.right<=a.left||r.left>=a.right||r.bottom<=a.top||r.top>=a.bottom)) hits.push([f.id, y, b.textContent.trim().slice(0,12)]); } }
+        if(y>=max) break; }
+      ib.classList.remove('show'); window.scrollTo(0,0); return {steps, nBtn, hits:hits.slice(0,6)}})()`);
+    ok(`13.15.${w} ${w}px 整頁捲動 ${ov.steps} 段：＋鈕與安裝橫幅不與任何按鈕重疊（檢查 ${ov.nBtn} 顆按鈕）`, ov.steps >= 2 && ov.nBtn >= 10 && ov.hits.length === 0, ov);
+  }
+  const tabA = async () => c.eval(`(()=>{const m=getComputedStyle(document.querySelector('nav.tabs')).backgroundColor.match(/[\\d.]+/g).map(Number); return m.length>3?m[3]:1})()`);
+  await c.width(390);
+  await c.open(BASE);
+  const aLight = await tabA();
+  ok('13.16a 手機底部分頁列淺色背景不透明（alpha＝' + aLight + '）', aLight === 1, aLight);
+  // 深色：底色要深、主要文字要亮（對比 ≥ 4.5）
+  await c.send('Emulation.setEmulatedMedia', { features: [{ name: 'prefers-color-scheme', value: 'dark' }] });
+  await c.width(390);
+  await c.open(BASE);
+  const dk = await safe(() => c.eval(`(()=>{const L=c=>{const m=c.match(/[\\d.]+/g).map(Number).slice(0,3).map(v=>{v/=255;return v<=.03928?v/12.92:Math.pow((v+.055)/1.055,2.4)});return .2126*m[0]+.7152*m[1]+.0722*m[2]};
+    const cr=(a,b)=>{const x=L(a),y=L(b);return (Math.max(x,y)+.05)/(Math.min(x,y)+.05)};
+    const bg=getComputedStyle(document.body).backgroundColor, card=getComputedStyle(document.querySelector('.hud7 .h')).backgroundColor, tx=getComputedStyle(document.querySelector('.hud7 b')).color,
+      tab=getComputedStyle(document.querySelector('nav.tabs button.on')), tile=getComputedStyle(document.querySelector('.tiles7 button'));
+    return {bgL:+L(bg).toFixed(3), hud:+cr(tx,card).toFixed(2), tab:+cr(tab.color,tab.backgroundColor).toFixed(2), tile:+cr(tile.color,tile.backgroundColor).toFixed(2)}})()`), {});
+  ok('13.14 深色模式：底色是深色、狀態列／目前分頁／圖格文字對比都 ≥ 4.5（' + J(dk) + '）', dk.bgL < 0.05 && dk.hud >= 4.5 && dk.tab >= 4.5 && dk.tile >= 4.5, dk);
+  const aDark = await tabA();
+  ok('13.16b 手機底部分頁列深色背景不透明（alpha＝' + aDark + '）', aDark === 1, aDark);
+  await c.send('Emulation.setEmulatedMedia', { features: [] });
+  await c.open(BASE);
 
   /* ───────── 12 錯誤與連線 ───────── */
   console.log('\n[12 沒有錯誤、沒有意外的對外連線]');
