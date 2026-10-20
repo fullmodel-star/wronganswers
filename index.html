@@ -297,6 +297,21 @@ body.lite *{animation:none!important;transition:none!important}
 /* 2026-10-12：手機版安裝橫幅已改成隨內容流動，頁尾只需避開右下＋鈕（body 另有 78px 底導覽留白） */
 .rl-signature .rl-sig-by{font-size:14px}
 .rl-signature .sig-legal{margin:14px auto 0;max-width:640px;font-size:15px;line-height:1.7;color:var(--muted)}
+/* 2026-10-20 文字量調整 wave2：頁尾免責收成一行「⚠ 使用前須知」點開看全文（15px 同原文、顏色沿用 --muted＝深淺色跟 App） */
+.rl-signature .sig-disc{margin:10px auto 0;max-width:640px;font-size:15px;line-height:1.7;color:var(--muted);text-align:center}
+.sig-disc>summary{display:flex;align-items:center;justify-content:center;gap:6px;width:fit-content;margin:0 auto;min-height:44px;padding:6px 16px;box-sizing:border-box;border:1px solid rgba(130,130,130,.35);border-radius:999px;font-size:15px;letter-spacing:1px;cursor:pointer;list-style:none;-webkit-tap-highlight-color:transparent}
+.sig-disc>summary::-webkit-details-marker{display:none}
+.sig-disc>summary::after{content:"\203A";display:inline-block;font-size:18px;line-height:1;transition:transform .2s}
+.sig-disc[open]>summary::after{transform:rotate(90deg)}
+.sig-disc>summary:focus-visible{outline:2px solid currentColor;outline-offset:2px}
+.sig-disc-body{margin-top:8px}
+/* 設定頁隱私提醒：一行摘要（看得出是上傳提醒）＋ⓘ，點開看全文 */
+details.ndisc{padding:0}
+details.ndisc>summary{display:flex;align-items:center;gap:6px;min-height:44px;padding:8px 12px;box-sizing:border-box;font-size:14px;font-weight:700;cursor:pointer;list-style:none;border-radius:11px;-webkit-tap-highlight-color:transparent}
+details.ndisc>summary::-webkit-details-marker{display:none}
+details.ndisc>summary .ndisc-i{margin-left:auto;font-size:16px;font-weight:400}
+details.ndisc>summary:focus-visible{outline:2px solid currentColor;outline-offset:2px}
+details.ndisc .ndisc-body{padding:0 12px 10px}
 .rl-signature .sig-sub{font-family:'Noto Serif TC',serif;font-size:15px;font-weight:600;letter-spacing:.5px}
 .rl-signature .sig-num{font-family:'IBM Plex Mono',monospace;font-size:13px;letter-spacing:2px;color:var(--muted)}
 @media (min-width:1024px){.rl-signature{padding-bottom:110px}}
@@ -661,9 +676,10 @@ nav.tabs button.on .i{transform:translateY(-1px) scale(1.08)}
     <div class="notice" style="margin-top:12px">
       🔑 金鑰完全<b>免費</b>（Gemini Flash 免費額度，學生用不完），只存在本機、不會外傳。不確定怎麼拿？看下方教學 👇
     </div>
-    <div class="notice" style="margin-top:10px">
-      🔒 <b>隱私提醒</b>：按「拍照辨識」時，照片會上傳到 Google 進行辨識（免費方案的內容 Google 可能用於改善服務）。<b>拍照前請遮住姓名／座號等個資</b>；不想上傳可改用「手動輸入」。其餘功能全部離線。
-    </div>
+    <details class="notice ndisc" id="privNote" style="margin-top:10px">
+      <summary>🔒 拍照辨識會上傳照片到 Google <span class="ndisc-i" aria-hidden="true">ⓘ</span></summary>
+      <div class="ndisc-body">🔒 <b>隱私提醒</b>：按「拍照辨識」時，照片會上傳到 Google 進行辨識（免費方案的內容 Google 可能用於改善服務）。<b>拍照前請遮住姓名／座號等個資</b>；不想上傳可改用「手動輸入」。其餘功能全部離線。</div>
+    </details>
 
     <details class="guide">
       <summary><span><svg class="ti" aria-hidden="true"><use href="#ti-info"/></svg>怎麼取得 Gemini 金鑰？（5 步驟）</span></summary>
@@ -764,7 +780,8 @@ nav.tabs button.on .i{transform:translateY(-1px) scale(1.08)}
     <p class="rl-sig-quote">今天的試煉，<br>是明天的高度。</p>
   </div>
   <p class="rl-sig-by">Ridgeline · by Lucas</p>
-  <p class="sig-legal">© 2026 Lucas　本 App 免費提供學習使用；程式與內容著作權皆屬作者，未經同意請勿重製、散布或作商業用途。<br>⚠️ 免責聲明：本 App 之題目、分類與解析僅供學習參考，力求正確但仍可能有誤，且不代表任何官方立場；正式考試與課程請以教育部、大學入學考試中心及各校公告與教材為準。與各官方機構、出版社均無隸屬或合作關係，所引用之名稱與商標歸原權利人所有。</p>
+  <p class="sig-legal">© 2026 Lucas　本 App 免費提供學習使用；程式與內容著作權皆屬作者，未經同意請勿重製、散布或作商業用途。</p>
+  <details class="sig-disc"><summary>⚠ 使用前須知</summary><div class="sig-disc-body">⚠️ 免責聲明：本 App 之題目、分類與解析僅供學習參考，力求正確但仍可能有誤，且不代表任何官方立場；正式考試與課程請以教育部、大學入學考試中心及各校公告與教材為準。與各官方機構、出版社均無隸屬或合作關係，所引用之名稱與商標歸原權利人所有。</div></details>
 </footer>
 
 </div><!--/wrap-->
@@ -2369,7 +2386,7 @@ async function init(){
 }
 
 /* ================= 版本更新機制 ================= */
-const APP_VERSION='14.10（2026-10-20 手機版圖示署名縮小）';
+const APP_VERSION='14.11（2026-10-20 頁尾免責與隱私提醒收合）';
 let swReg=null, swRefreshing=false;
 function showUpdateBanner(){$('updateBanner').classList.add('show')}
 function registerSW(){
