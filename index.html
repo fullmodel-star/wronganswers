@@ -315,6 +315,11 @@ details.ndisc .ndisc-body{padding:0 12px 10px}
 .rl-signature .sig-sub{font-family:'Noto Serif TC',serif;font-size:15px;font-weight:600;letter-spacing:.5px}
 .rl-signature .sig-num{font-family:'IBM Plex Mono',monospace;font-size:13px;letter-spacing:2px;color:var(--muted)}
 @media (min-width:1024px){.rl-signature{padding-bottom:110px}}
+/* 2026-10-20 頁尾山形深淺版：淺色 navy、深色 white（跟隨系統＋App 自己的 data-theme 切換） */
+.rl-signature .rl-sig-dk{display:none}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .rl-signature .rl-sig-lt{display:none}:root:not([data-theme="light"]) .rl-signature .rl-sig-dk{display:block}}
+:root[data-theme="dark"] .rl-signature .rl-sig-lt{display:none}
+:root[data-theme="dark"] .rl-signature .rl-sig-dk{display:block}
 
 /* ===== 空狀態（首次使用）===== */
 .welcome{max-width:640px;margin:0 auto}
@@ -775,7 +780,7 @@ nav.tabs button.on .i{transform:translateY(-1px) scale(1.08)}
 
 <footer class="rl-signature theme-denali">
   <div class="rl-sig-row">
-    <span class="rl-mkcol" style="display:inline-flex;flex-direction:column;align-items:center;gap:3px"><img class="rl-sig-glyph" src="rl-mark-denali-navy.png" width="66" height="34" alt="" style="object-fit:contain"><span class="sig-sub">Denali</span><span class="sig-num">6,190 M</span></span>
+    <span class="rl-mkcol" style="display:inline-flex;flex-direction:column;align-items:center;gap:3px"><img class="rl-sig-glyph rl-sig-lt" src="rl-mark-denali-navy.png" width="66" height="34" alt="" style="object-fit:contain"><img class="rl-sig-glyph rl-sig-dk" src="rl-mark-denali-white.png" width="66" height="34" alt="" style="object-fit:contain"><span class="sig-sub">Denali</span><span class="sig-num">6,190 M</span></span>
     <span class="rl-sig-rule" style="height:88px"></span>
     <p class="rl-sig-quote">今天的試煉，<br>是明天的高度。</p>
   </div>
@@ -2386,7 +2391,7 @@ async function init(){
 }
 
 /* ================= 版本更新機制 ================= */
-const APP_VERSION='14.11（2026-10-20 頁尾免責與隱私提醒收合）';
+const APP_VERSION='14.12（2026-10-20 深色模式頁尾山形改白色版）';
 let swReg=null, swRefreshing=false;
 function showUpdateBanner(){$('updateBanner').classList.add('show')}
 function registerSW(){
