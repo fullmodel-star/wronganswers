@@ -47,7 +47,7 @@
   });
 })();
 /* RL_FRESH_END */
-const CACHE='cuoti-v44';
+const CACHE='cuoti-v45';
 const ASSETS=['./','./index.html','./manifest.webmanifest','./ridgeline-ui.css','./rl-mark-denali-navy.png','./rl-mark-denali-white.png','./favicon.svg','./icon.svg','./icon-180.png','./icon-192.png','./icon-512.png','./icon-maskable-512.png',
   // 2026-10-19 版面美化「修練手帳」：粉圓子集字型＋Fluent 3D 圖
   './vendor/round-ui/wb-round.woff2','./vendor/fluent-3d/book.png','./vendor/fluent-3d/pencil.png','./vendor/fluent-3d/fire.png','./vendor/fluent-3d/grad.png','./vendor/fluent-3d/chart.png','./vendor/fluent-3d/gear.png','./vendor/fluent-3d/stopwatch.png','./vendor/fluent-3d/camera.png','./vendor/fluent-3d/search.png'];

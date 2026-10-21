@@ -494,6 +494,7 @@ nav.tabs button.on .i{transform:translateY(-1px) scale(1.08)}
 <meta name="twitter:description" content="把錯題收進來，看各科分布與弱點主題，還能限時模擬考，離線也能用。">
 <meta name="twitter:image" content="https://fullmodel-star.github.io/wronganswers/og-wrongbook.png?v=20260903-1">
 <meta name="twitter:image:alt" content="錯題管理器 — 錯題複習與弱點分析">
+<style>/* 2026-10-21 頁首檢視：底部分頁與桌機側欄都有「設定」，頁首這顆重複、把副標擠成「…」→ 隱藏 */.rl-appbar .hdr-set{display:none}</style>
 </head>
 <body class="theme-denali">
 <!-- TABLER_SPRITE_START：Tabler Icons 3.49.0（MIT，授權見 vendor/tabler-icons/LICENSE.txt）；由 _tools/build_icon_sprite.py 產生，勿手改 -->
@@ -504,11 +505,11 @@ nav.tabs button.on .i{transform:translateY(-1px) scale(1.08)}
   <span class="rl-mark"><img class="rl-glyph" src="rl-mark-denali-white.png" width="30" height="30" alt="" style="object-fit:contain"></span>
   <div>
     <div class="rl-title">錯題管理器</div>
-    <div class="rl-sub">手打也行，拍照更快 · 學測全科</div>
+    <div class="rl-sub">學測全科</div>
   </div>
   <span class="rl-spacer"></span>
   <button class="iconbtn" onclick="openSearch()" title="搜尋" aria-label="搜尋"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg></button>
-  <button class="iconbtn" onclick="go('settings')" title="設定" aria-label="設定"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 13.5a7.5 7.5 0 0 0 0-3l1.9-1.5-2-3.4-2.3.9a7.4 7.4 0 0 0-2.6-1.5L14 2.5h-4l-.4 2.5a7.4 7.4 0 0 0-2.6 1.5l-2.3-.9-2 3.4L4.6 10.5a7.5 7.5 0 0 0 0 3L2.7 15l2 3.4 2.3-.9c.8.7 1.6 1.2 2.6 1.5l.4 2.5h4l.4-2.5a7.4 7.4 0 0 0 2.6-1.5l2.3.9 2-3.4z"/></svg></button>
+  <button class="iconbtn hdr-set" onclick="go('settings')" title="設定" aria-label="設定"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 13.5a7.5 7.5 0 0 0 0-3l1.9-1.5-2-3.4-2.3.9a7.4 7.4 0 0 0-2.6-1.5L14 2.5h-4l-.4 2.5a7.4 7.4 0 0 0-2.6 1.5l-2.3-.9-2 3.4L4.6 10.5a7.5 7.5 0 0 0 0 3L2.7 15l2 3.4 2.3-.9c.8.7 1.6 1.2 2.6 1.5l.4 2.5h4l.4-2.5a7.4 7.4 0 0 0 2.6-1.5l2.3.9 2-3.4z"/></svg></button>
 </header>
 
 <!-- 側邊欄（平板橫式/桌面顯示） -->
@@ -2391,7 +2392,7 @@ async function init(){
 }
 
 /* ================= 版本更新機制 ================= */
-const APP_VERSION='14.13（2026-10-20 離線要有，但不能擋更新）';
+const APP_VERSION='14.14（2026-10-21 頁首整理）';
 let swReg=null, swRefreshing=false;
 function showUpdateBanner(){$('updateBanner').classList.add('show')}
 function registerSW(){
